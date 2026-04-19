@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תשתית משותפת - ביצוע ותקציב למניעת נזקים מרובים</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Arial, 'Segoe UI', sans-serif;
+  background: #E8E8E8;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.demo-container {
+  width: 100%;
+  max-width: 1200px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+.header {
+  background: #4A4A2A;
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header h1 { font-size: 18px; font-weight: 600; }
+.header .subtitle { font-size: 11px; color: #CCC; }
+.instructions {
+  padding: 12px 24px;
+  background: #FFF9E6;
+  border-bottom: 1px solid #F0E5B8;
+  color: #6B5F1A;
+  font-size: 12px;
+  text-align: center;
+}
+.svg-wrap {
+  background: #E8E8E8;
+  padding: 10px;
+}
+.network-svg { width: 100%; height: auto; display: block; }
+circle.fail-dot {
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.35s ease, filter 0.35s ease, stroke-width 0.2s ease;
+  filter: saturate(1.15) drop-shadow(0 0 2.5px rgba(255,255,255,0.7));
+}
+circle.fail-dot:hover { stroke-width: 2.5; }
+circle.fail-dot.off {
+  opacity: 0.18;
+  filter: grayscale(0.85) brightness(0.8) saturate(0);
+}
+.controls {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #F5F5F0;
+  border-top: 1px solid #D8D8D8;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 8px 20px;
+  background: #4A4A2A;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+  font-family: inherit;
+}
+.btn:hover { background: #666644; }
+.counter {
+  font-size: 14px;
+  color: #4A4A2A;
+  font-weight: 500;
+}
+.counter-num {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: #4A4A2A;
+  color: white;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: center;
+  margin: 0 2px;
+}
+.damage-box.high {
+  animation: pulse-damage 1.8s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+@keyframes pulse-damage {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+</style>
+</head>
+<body>
+<div class="demo-container">
+  <div class="header">
+    <h1>ביצוע ותקציב משותף → מניעת נזקים מרובים</h1>
+    <div class="subtitle">דמו אינטראקטיבי | עיקרון ה-ROI המשותף</div>
+  </div>
+  
+  <div class="instructions">
+    💡 הנואודים זוהרים כשהם תקינים. לחצו על נואוד כדי לכבות אותו - רק הנואודים התלויים בו יכבו בקסקייד, לא כל הרשת
+  </div>
+  
+  <div class="svg-wrap">
+<svg class="network-svg" viewBox="0 0 960 540" role="img">
+<title>Interactive network - budget flows to two damages</title>
+
+<!-- Background -->
+<rect x="0" y="0" width="960" height="540" fill="#E8E8E8"/>
+
+<!-- Topographic lines -->
+<path d="M0 140 Q240 120 480 140 T960 140" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+<path d="M0 220 Q240 200 480 220 T960 220" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+<path d="M0 300 Q240 320 480 300 T960 300" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+<path d="M0 380 Q240 360 480 380 T960 380" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+<path d="M0 460 Q240 440 480 460 T960 460" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+
+<!-- Title -->
+<text x="480" y="26" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="14" font-weight="700">ביצוע ותקציב משותף → מניעת נזקים מרובים</text>
+<text x="480" y="44" text-anchor="middle" fill="#666" font-family="Arial" font-size="10">כל נואוד תלוי בקודמיו - כשל אחד מתגלגל קדימה לכל השלבים הבאים</text>
+
+<!-- Content shifted for 16:9 -->
+<g transform="translate(140, 0)">
+
+<!-- Chaotic connections (faded) -->
+<line x1="95" y1="290" x2="160" y2="140" stroke="#5B8A72" stroke-width="0.6" opacity="0.2"/>
+<line x1="95" y1="290" x2="160" y2="215" stroke="#7A9E7E" stroke-width="0.7" opacity="0.25"/>
+<line x1="95" y1="290" x2="160" y2="290" stroke="#5B8A72" stroke-width="0.8" opacity="0.3"/>
+<line x1="95" y1="290" x2="160" y2="365" stroke="#7A9E7E" stroke-width="0.6" opacity="0.2"/>
+<line x1="95" y1="290" x2="160" y2="440" stroke="#5B8A72" stroke-width="0.5" opacity="0.18"/>
+<line x1="95" y1="290" x2="245" y2="165" stroke="#7A9E7E" stroke-width="0.4" opacity="0.15"/>
+<line x1="95" y1="290" x2="245" y2="265" stroke="#5B8A72" stroke-width="0.5" opacity="0.18"/>
+<line x1="95" y1="290" x2="245" y2="365" stroke="#7A9E7E" stroke-width="0.4" opacity="0.15"/>
+<line x1="95" y1="290" x2="330" y2="190" stroke="#5B8A72" stroke-width="0.3" opacity="0.12"/>
+<line x1="95" y1="290" x2="330" y2="315" stroke="#7A9E7E" stroke-width="0.4" opacity="0.15"/>
+<line x1="95" y1="290" x2="330" y2="415" stroke="#5B8A72" stroke-width="0.3" opacity="0.12"/>
+<line x1="95" y1="290" x2="415" y2="240" stroke="#B8860B" stroke-width="0.3" opacity="0.12"/>
+<line x1="95" y1="290" x2="415" y2="340" stroke="#B8860B" stroke-width="0.3" opacity="0.12"/>
+<line x1="95" y1="290" x2="500" y2="215" stroke="#C75B39" stroke-width="0.2" opacity="0.1"/>
+<line x1="95" y1="290" x2="500" y2="365" stroke="#C75B39" stroke-width="0.2" opacity="0.1"/>
+
+<line x1="160" y1="140" x2="245" y2="165" stroke="#5B8A72" stroke-width="0.5" opacity="0.18"/>
+<line x1="160" y1="140" x2="245" y2="265" stroke="#7A9E7E" stroke-width="0.4" opacity="0.15"/>
+<line x1="160" y1="215" x2="245" y2="165" stroke="#5B8A72" stroke-width="0.6" opacity="0.2"/>
+<line x1="160" y1="215" x2="245" y2="365" stroke="#7A9E7E" stroke-width="0.4" opacity="0.15"/>
+<line x1="160" y1="290" x2="245" y2="265" stroke="#5B8A72" stroke-width="0.7" opacity="0.22"/>
+<line x1="160" y1="290" x2="245" y2="415" stroke="#7A9E7E" stroke-width="0.5" opacity="0.18"/>
+<line x1="160" y1="365" x2="245" y2="365" stroke="#5B8A72" stroke-width="0.6" opacity="0.2"/>
+<line x1="160" y1="440" x2="245" y2="415" stroke="#7A9E7E" stroke-width="0.5" opacity="0.18"/>
+
+<line x1="245" y1="165" x2="330" y2="190" stroke="#7A9E7E" stroke-width="0.5" opacity="0.18"/>
+<line x1="245" y1="165" x2="330" y2="315" stroke="#5B8A72" stroke-width="0.4" opacity="0.15"/>
+<line x1="245" y1="265" x2="330" y2="240" stroke="#7A9E7E" stroke-width="0.6" opacity="0.2"/>
+<line x1="245" y1="265" x2="330" y2="365" stroke="#5B8A72" stroke-width="0.5" opacity="0.18"/>
+<line x1="245" y1="365" x2="330" y2="315" stroke="#7A9E7E" stroke-width="0.6" opacity="0.2"/>
+<line x1="245" y1="415" x2="330" y2="415" stroke="#5B8A72" stroke-width="0.5" opacity="0.18"/>
+
+<line x1="330" y1="190" x2="415" y2="190" stroke="#B8860B" stroke-width="0.5" opacity="0.18"/>
+<line x1="330" y1="190" x2="415" y2="290" stroke="#B8860B" stroke-width="0.4" opacity="0.15"/>
+<line x1="330" y1="240" x2="415" y2="240" stroke="#B8860B" stroke-width="0.6" opacity="0.2"/>
+<line x1="330" y1="315" x2="415" y2="290" stroke="#B8860B" stroke-width="0.6" opacity="0.2"/>
+<line x1="330" y1="365" x2="415" y2="340" stroke="#B8860B" stroke-width="0.5" opacity="0.18"/>
+<line x1="330" y1="415" x2="415" y2="390" stroke="#B8860B" stroke-width="0.5" opacity="0.18"/>
+
+<line x1="415" y1="190" x2="500" y2="165" stroke="#C75B39" stroke-width="0.5" opacity="0.18"/>
+<line x1="415" y1="240" x2="500" y2="215" stroke="#C75B39" stroke-width="0.6" opacity="0.2"/>
+<line x1="415" y1="290" x2="500" y2="265" stroke="#C75B39" stroke-width="0.5" opacity="0.18"/>
+<line x1="415" y1="340" x2="500" y2="315" stroke="#C75B39" stroke-width="0.6" opacity="0.2"/>
+<line x1="415" y1="390" x2="500" y2="365" stroke="#C75B39" stroke-width="0.5" opacity="0.18"/>
+
+<!-- Highlighted gold flow lines to both damage boxes -->
+<line x1="500" y1="165" x2="545" y2="200" stroke="#D4A017" stroke-width="1.5" opacity="0.75"/>
+<line x1="500" y1="215" x2="545" y2="200" stroke="#D4A017" stroke-width="1.8" opacity="0.85"/>
+<line x1="500" y1="265" x2="545" y2="200" stroke="#D4A017" stroke-width="1.5" opacity="0.7"/>
+<line x1="500" y1="315" x2="545" y2="200" stroke="#D4A017" stroke-width="1.2" opacity="0.55"/>
+<line x1="500" y1="365" x2="545" y2="200" stroke="#D4A017" stroke-width="1" opacity="0.45"/>
+<line x1="500" y1="415" x2="545" y2="200" stroke="#D4A017" stroke-width="0.8" opacity="0.35"/>
+
+<line x1="500" y1="165" x2="545" y2="380" stroke="#D4A017" stroke-width="0.8" opacity="0.35"/>
+<line x1="500" y1="215" x2="545" y2="380" stroke="#D4A017" stroke-width="1" opacity="0.45"/>
+<line x1="500" y1="265" x2="545" y2="380" stroke="#D4A017" stroke-width="1.2" opacity="0.55"/>
+<line x1="500" y1="315" x2="545" y2="380" stroke="#D4A017" stroke-width="1.5" opacity="0.7"/>
+<line x1="500" y1="365" x2="545" y2="380" stroke="#D4A017" stroke-width="1.8" opacity="0.85"/>
+<line x1="500" y1="415" x2="545" y2="380" stroke="#D4A017" stroke-width="1.5" opacity="0.75"/>
+
+<!-- Vertical dashed column lines -->
+<line x1="160" y1="115" x2="160" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.25"/>
+<line x1="245" y1="115" x2="245" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.25"/>
+<line x1="330" y1="115" x2="330" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.25"/>
+<line x1="415" y1="115" x2="415" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.25"/>
+<line x1="500" y1="115" x2="500" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.25"/>
+
+<!-- Dots with failure labels -->
+<text x="160" y="128" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="7">הכרה בסיכון</text>
+<circle class="fail-dot" cx="160" cy="140" r="7" fill="#3D9970" stroke="#2D7A5A" stroke-width="1"/>
+<text x="160" y="203" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="7">הבנה רחבה</text>
+<circle class="fail-dot" cx="160" cy="215" r="8" fill="#5CB88A" stroke="#3D9970" stroke-width="1"/>
+<text x="160" y="278" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="7">גיבוי פוליטי</text>
+<circle class="fail-dot" cx="160" cy="290" r="7" fill="#3D9970" stroke="#2D7A5A" stroke-width="1"/>
+<text x="160" y="353" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="7">שיתוף מידע</text>
+<circle class="fail-dot" cx="160" cy="365" r="8" fill="#5CB88A" stroke="#3D9970" stroke-width="1"/>
+<text x="160" y="428" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="7">ראייה מערכתית</text>
+<circle class="fail-dot" cx="160" cy="440" r="6" fill="#3D9970" stroke="#2D7A5A" stroke-width="1"/>
+
+<text x="245" y="153" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="7">בנייה בטוחה</text>
+<circle class="fail-dot" cx="245" cy="165" r="7" fill="#5CB88A" stroke="#3D9970" stroke-width="1"/>
+<text x="245" y="253" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="7">תקציב מבוסס נתונים</text>
+<circle class="fail-dot" cx="245" cy="265" r="8" fill="#7ACC9D" stroke="#5CB88A" stroke-width="1"/>
+<text x="245" y="353" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="7">מיקוד ב-ROI</text>
+<circle class="fail-dot" cx="245" cy="365" r="7" fill="#5CB88A" stroke="#3D9970" stroke-width="1"/>
+<text x="245" y="403" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="7">הקצאת משאבים</text>
+<circle class="fail-dot" cx="245" cy="415" r="6" fill="#7ACC9D" stroke="#5CB88A" stroke-width="1"/>
+
+<text x="330" y="178" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="7">רשת חיישנים</text>
+<circle class="fail-dot" cx="330" cy="190" r="7" fill="#D4A017" stroke="#B8860B" stroke-width="1"/>
+<text x="330" y="228" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="7">כיסוי מלא</text>
+<circle class="fail-dot" cx="330" cy="240" r="8" fill="#E8B923" stroke="#D4A017" stroke-width="1"/>
+<text x="330" y="303" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="7">נתונים עדכניים</text>
+<circle class="fail-dot" cx="330" cy="315" r="7" fill="#D4A017" stroke="#B8860B" stroke-width="1"/>
+<text x="330" y="353" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="7">ניטור רציף</text>
+<circle class="fail-dot" cx="330" cy="365" r="6" fill="#E8B923" stroke="#D4A017" stroke-width="1"/>
+<text x="330" y="403" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="7">מערכת מתקדמת</text>
+<circle class="fail-dot" cx="330" cy="415" r="7" fill="#D4A017" stroke="#B8860B" stroke-width="1"/>
+
+<text x="415" y="178" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="7">תקנות מותאמות</text>
+<circle class="fail-dot" cx="415" cy="190" r="6" fill="#E87D4E" stroke="#D4663B" stroke-width="1"/>
+<text x="415" y="228" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="7">היטלים מדורגים</text>
+<circle class="fail-dot" cx="415" cy="240" r="8" fill="#F09565" stroke="#E87D4E" stroke-width="1"/>
+<text x="415" y="278" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="7">אכיפה אפקטיבית</text>
+<circle class="fail-dot" cx="415" cy="290" r="7" fill="#E87D4E" stroke="#D4663B" stroke-width="1"/>
+<text x="415" y="328" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="7">חקיקה מעודכנת</text>
+<circle class="fail-dot" cx="415" cy="340" r="8" fill="#F09565" stroke="#E87D4E" stroke-width="1"/>
+<text x="415" y="378" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="7">מסגרת שלמה</text>
+<circle class="fail-dot" cx="415" cy="390" r="6" fill="#E87D4E" stroke="#D4663B" stroke-width="1"/>
+
+<text x="500" y="153" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="7">מיפוי מדויק</text>
+<circle class="fail-dot" cx="500" cy="165" r="7" fill="#D4533B" stroke="#B8442E" stroke-width="1"/>
+<text x="500" y="203" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="7">דוחות דינמיים</text>
+<circle class="fail-dot" cx="500" cy="215" r="6" fill="#E86B52" stroke="#D4533B" stroke-width="1"/>
+<text x="500" y="253" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="7">אינטגרציה</text>
+<circle class="fail-dot" cx="500" cy="265" r="8" fill="#D4533B" stroke="#B8442E" stroke-width="1"/>
+<text x="500" y="303" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="7">ניתוח משולב</text>
+<circle class="fail-dot" cx="500" cy="315" r="7" fill="#E86B52" stroke="#D4533B" stroke-width="1"/>
+<text x="500" y="353" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="7">תמונה מלאה</text>
+<circle class="fail-dot" cx="500" cy="365" r="8" fill="#D4533B" stroke="#B8442E" stroke-width="1"/>
+<text x="500" y="403" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="7">מדידת ROI</text>
+<circle class="fail-dot" cx="500" cy="415" r="6" fill="#E86B52" stroke="#D4533B" stroke-width="1"/>
+
+<!-- Column labels -->
+<text x="160" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="11" font-weight="600">מודעות</text>
+<text x="245" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="11" font-weight="600">תכנון</text>
+<text x="330" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="11" font-weight="600">ניטור</text>
+<text x="415" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="11" font-weight="600">רגולציה</text>
+<text x="500" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">ניתוח דאטה</text>
+
+<!-- Input Box: ביצוע ותקציב -->
+<rect x="10" y="250" width="90" height="80" rx="4" fill="#FFFFFF" stroke="#D4A017" stroke-width="3"/>
+<rect x="10" y="250" width="6" height="80" rx="2" fill="#D4A017"/>
+<text x="55" y="285" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="12" font-weight="700">ביצוע</text>
+<text x="55" y="303" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="12" font-weight="700">ותקציב</text>
+<text x="55" y="322" text-anchor="middle" fill="#B8860B" font-family="Arial" font-size="8" font-weight="500">השקעה אחת</text>
+
+<!-- OUTPUT BOX 1: פסולת (top) - interactive -->
+<rect id="damage-box-1" class="damage-box" x="545" y="150" width="150" height="100" rx="4" fill="#FFFFFF" stroke="#D4533B" stroke-width="2.5"/>
+<rect id="damage-accent-1" x="689" y="150" width="6" height="100" rx="2" fill="#D4533B"/>
+<text x="617" y="172" text-anchor="middle" id="damage-title-1" fill="#B8442E" font-family="Arial" font-size="12" font-weight="700">פסולת</text>
+<text x="617" y="196" text-anchor="middle" id="damage-pct-1" fill="#B8442E" font-family="Arial" font-size="20" font-weight="700">0%</text>
+<text x="617" y="215" text-anchor="middle" id="damage-amount-1" fill="#888" font-family="Arial" font-size="9">מתוך 1.58 מיליארד ₪</text>
+<text x="617" y="232" text-anchor="middle" id="damage-level-1" fill="#B8442E" font-family="Arial" font-size="10" font-weight="600">מינימלי</text>
+<rect x="555" y="240" width="130" height="5" rx="2" fill="#E0E0E0"/>
+<rect id="damage-fill-1" x="685" y="240" width="0" height="5" rx="2" fill="#D4533B"/>
+
+<!-- OUTPUT BOX 2: הצפות (bottom) - interactive -->
+<rect id="damage-box-2" class="damage-box" x="545" y="330" width="150" height="100" rx="4" fill="#FFFFFF" stroke="#E87D4E" stroke-width="2.5"/>
+<rect id="damage-accent-2" x="689" y="330" width="6" height="100" rx="2" fill="#E87D4E"/>
+<text x="617" y="352" text-anchor="middle" id="damage-title-2" fill="#C85A35" font-family="Arial" font-size="12" font-weight="700">הצפות</text>
+<text x="617" y="376" text-anchor="middle" id="damage-pct-2" fill="#C85A35" font-family="Arial" font-size="20" font-weight="700">0%</text>
+<text x="617" y="395" text-anchor="middle" id="damage-amount-2" fill="#888" font-family="Arial" font-size="9">מתוך מאות מיליוני ₪</text>
+<text x="617" y="412" text-anchor="middle" id="damage-level-2" fill="#C85A35" font-family="Arial" font-size="10" font-weight="600">מינימלי</text>
+<rect x="555" y="420" width="130" height="5" rx="2" fill="#E0E0E0"/>
+<rect id="damage-fill-2" x="685" y="420" width="0" height="5" rx="2" fill="#E87D4E"/>
+
+<!-- Fading edge dots -->
+<circle cx="160" cy="105" r="3" fill="#3D9970" opacity="0.2"/>
+<circle cx="245" cy="105" r="3" fill="#5CB88A" opacity="0.2"/>
+<circle cx="330" cy="105" r="3" fill="#D4A017" opacity="0.2"/>
+<circle cx="415" cy="105" r="3" fill="#E87D4E" opacity="0.2"/>
+<circle cx="500" cy="105" r="3" fill="#D4533B" opacity="0.2"/>
+
+</g>
+
+<!-- Bottom note -->
+<text x="480" y="510" text-anchor="middle" fill="#888" font-family="Arial" font-size="9" font-style="italic">* ניצול תשתית משותפת - אותו תקציב פותר מספר תחומי נזק</text>
+
+</svg>
+  </div>
+  
+  <div class="controls">
+    <button class="btn" onclick="nnReset()">הפעל הכל</button>
+    <button class="btn" onclick="nnAll()">כבה הכל</button>
+    <div class="counter">נואודים כבויים: <span class="counter-num" id="active-count">0</span> / 25</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const dots = document.querySelectorAll('circle.fail-dot');
+  
+  // Group dots by column and assign row indices based on cy position
+  const colMap = { '160': 1, '245': 2, '330': 3, '415': 4, '500': 5 };
+  const columns = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+  dots.forEach(d => {
+    const col = colMap[d.getAttribute('cx')];
+    columns[col].push(d);
+  });
+  Object.keys(columns).forEach(col => {
+    columns[col].sort((a, b) => parseFloat(a.getAttribute('cy')) - parseFloat(b.getAttribute('cy')));
+    columns[col].forEach((d, row) => {
+      d.dataset.nodeId = `${col}-${row}`;
+      d.dataset.col = col;
+      d.dataset.clicked = 'false';
+    });
+  });
+  
+  // Dependency graph: each child node depends on 1-2 specific parents in previous column
+  // A node fails if ANY of its parents fails (partial cascade through specific paths)
+  const parents = {
+    // Column 2 (4 nodes) depends on column 1 (5 nodes)
+    '2-0': ['1-0', '1-1'],
+    '2-1': ['1-1', '1-2'],
+    '2-2': ['1-2', '1-3'],
+    '2-3': ['1-3', '1-4'],
+    // Column 3 (5 nodes) depends on column 2
+    '3-0': ['2-0'],
+    '3-1': ['2-0', '2-1'],
+    '3-2': ['2-1', '2-2'],
+    '3-3': ['2-2', '2-3'],
+    '3-4': ['2-3'],
+    // Column 4 (5 nodes) depends on column 3
+    '4-0': ['3-0', '3-1'],
+    '4-1': ['3-1', '3-2'],
+    '4-2': ['3-2', '3-3'],
+    '4-3': ['3-3', '3-4'],
+    '4-4': ['3-4'],
+    // Column 5 (6 nodes) depends on column 4
+    '5-0': ['4-0'],
+    '5-1': ['4-0', '4-1'],
+    '5-2': ['4-1', '4-2'],
+    '5-3': ['4-2', '4-3'],
+    '5-4': ['4-3', '4-4'],
+    '5-5': ['4-4']
+  };
+  
+  // Damage box 1 elements (פסולת)
+  const box1 = document.getElementById('damage-box-1');
+  const accent1 = document.getElementById('damage-accent-1');
+  const title1 = document.getElementById('damage-title-1');
+  const pct1 = document.getElementById('damage-pct-1');
+  const level1 = document.getElementById('damage-level-1');
+  const fill1 = document.getElementById('damage-fill-1');
+  
+  // Damage box 2 elements (הצפות)
+  const box2 = document.getElementById('damage-box-2');
+  const accent2 = document.getElementById('damage-accent-2');
+  const title2 = document.getElementById('damage-title-2');
+  const pct2 = document.getElementById('damage-pct-2');
+  const level2 = document.getElementById('damage-level-2');
+  const fill2 = document.getElementById('damage-fill-2');
+  
+  const cnt = document.getElementById('active-count');
+
+  function updateDamageBox(elements, pct, baseColors) {
+    const { box, accent, title, pctEl, levelEl, fill } = elements;
+    
+    pctEl.textContent = Math.round(pct * 100) + '%';
+    
+    // Fill bar (grows right to left for RTL)
+    const maxW = 130;
+    const newW = maxW * pct;
+    fill.setAttribute('width', newW);
+    fill.setAttribute('x', 685 - newW);
+    
+    // Color and level by damage
+    let color = baseColors.base, level = 'מינימלי';
+    if (pct > 0) { color = baseColors.base; level = 'נמוך'; }
+    if (pct > 0.25) { color = '#D4A017'; level = 'בינוני'; }
+    if (pct > 0.5) { color = '#E87D4E'; level = 'גבוה'; }
+    if (pct > 0.75) { color = '#D4533B'; level = 'קריטי'; }
+    
+    box.setAttribute('stroke', color);
+    accent.setAttribute('fill', color);
+    title.setAttribute('fill', color);
+    pctEl.setAttribute('fill', color);
+    levelEl.setAttribute('fill', color);
+    levelEl.textContent = level;
+    fill.setAttribute('fill', color);
+    
+    if (pct > 0.5) box.classList.add('high');
+    else box.classList.remove('high');
+  }
+
+  function update() {
+    // Compute off-status column by column (topological order)
+    const offStatus = {};
+    
+    // Column 1: off only if user clicked
+    columns[1].forEach(d => {
+      offStatus[d.dataset.nodeId] = d.dataset.clicked === 'true';
+    });
+    
+    // Columns 2-5: off if clicked OR any specific parent is off
+    for (let col = 2; col <= 5; col++) {
+      columns[col].forEach(d => {
+        const id = d.dataset.nodeId;
+        const clicked = d.dataset.clicked === 'true';
+        const anyParentOff = parents[id].some(pid => offStatus[pid]);
+        offStatus[id] = clicked || anyParentOff;
+      });
+    }
+    
+    // Apply visual state and count
+    let offCount = 0;
+    dots.forEach(d => {
+      const isOff = offStatus[d.dataset.nodeId];
+      d.classList.toggle('off', isOff);
+      if (isOff) offCount++;
+    });
+    
+    const total = dots.length;
+    const pct = offCount / total;
+    
+    cnt.textContent = offCount;
+    
+    // Both damage boxes update simultaneously with shared pct
+    updateDamageBox({
+      box: box1, accent: accent1, title: title1, pctEl: pct1, levelEl: level1, fill: fill1
+    }, pct, { base: '#B8442E' });
+    
+    updateDamageBox({
+      box: box2, accent: accent2, title: title2, pctEl: pct2, levelEl: level2, fill: fill2
+    }, pct, { base: '#C85A35' });
+  }
+
+  dots.forEach(d => {
+    d.addEventListener('click', () => {
+      d.dataset.clicked = d.dataset.clicked === 'true' ? 'false' : 'true';
+      update();
+    });
+  });
+
+  window.nnReset = function() {
+    dots.forEach(d => { d.dataset.clicked = 'false'; });
+    update();
+  };
+  window.nnAll = function() {
+    dots.forEach(d => { d.dataset.clicked = 'true'; });
+    update();
+  };
+  
+  update();
+})();
+</script>
+</body>
+</html>
