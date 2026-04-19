@@ -115,7 +115,7 @@ circle.fail-dot.off {
   </div>
   
   <div class="instructions">
-    💡 הנואודים זוהרים כשהם תקינים. לחצו על נואוד כדי לכבות אותו - רק הנואודים התלויים בו יכבו בקסקייד, לא כל הרשת
+    💡 הנואודים זוהרים כשהם תקינים. לחצו לכיבוי נואוד - כל נואוד משפיע באופן שונה על שני תחומי הנזק (למשל: "בנייה בטוחה" חשובה יותר להצפות, "היטלים מדורגים" לפסולת)
   </div>
   
   <div class="svg-wrap">
@@ -368,6 +368,32 @@ circle.fail-dot.off {
     '5-5': ['4-4']
   };
   
+  // Per-node weights for each damage domain: [waste_weight, flood_weight]
+  // Different nodes affect different damages differently
+  const weights = {
+    // Column 1 - Awareness (foundational, affects both equally)
+    '1-0': [1.0, 1.0], '1-1': [1.0, 1.0], '1-2': [1.0, 1.0], '1-3': [1.0, 1.0], '1-4': [1.0, 1.0],
+    // Column 2 - Planning
+    '2-0': [0.3, 1.8], // בנייה בטוחה - strongly FLOOD (urban planning)
+    '2-1': [1.0, 1.0], '2-2': [1.0, 1.0], '2-3': [1.0, 1.0],
+    // Column 3 - Monitoring  
+    '3-0': [0.5, 1.5], // רשת חיישנים - FLOOD-biased (water sensors)
+    '3-1': [1.0, 1.0], '3-2': [1.0, 1.0], '3-3': [1.0, 1.0], '3-4': [1.0, 1.0],
+    // Column 4 - Regulation (mostly waste-focused)
+    '4-0': [1.5, 0.5], // תקנות מותאמות - WASTE-biased
+    '4-1': [1.8, 0.3], // היטלים מדורגים - strongly WASTE (landfill fees)
+    '4-2': [1.0, 1.0], '4-3': [1.0, 1.0],
+    '4-4': [1.3, 0.7], // מסגרת שלמה - WASTE-biased
+    // Column 5 - Data Analysis
+    '5-0': [0.3, 1.8], // מיפוי מדויק - strongly FLOOD (flood zone mapping)
+    '5-1': [1.0, 1.0], '5-2': [1.0, 1.0], '5-3': [1.0, 1.0], '5-4': [1.0, 1.0],
+    '5-5': [1.8, 0.2]  // מדידת ROI - strongly WASTE (budget tracking)
+  };
+  
+  // Total weights per domain (for percentage calculation)
+  const totalWaste = Object.values(weights).reduce((sum, w) => sum + w[0], 0);
+  const totalFlood = Object.values(weights).reduce((sum, w) => sum + w[1], 0);
+  
   // Damage box 1 elements (פסולת)
   const box1 = document.getElementById('damage-box-1');
   const accent1 = document.getElementById('damage-accent-1');
@@ -435,27 +461,35 @@ circle.fail-dot.off {
       });
     }
     
-    // Apply visual state and count
+    // Apply visual state and compute weighted damage per domain
     let offCount = 0;
+    let offWasteWeight = 0;
+    let offFloodWeight = 0;
+    
     dots.forEach(d => {
-      const isOff = offStatus[d.dataset.nodeId];
+      const id = d.dataset.nodeId;
+      const isOff = offStatus[id];
       d.classList.toggle('off', isOff);
-      if (isOff) offCount++;
+      if (isOff) {
+        offCount++;
+        offWasteWeight += weights[id][0];
+        offFloodWeight += weights[id][1];
+      }
     });
     
-    const total = dots.length;
-    const pct = offCount / total;
+    const pctWaste = offWasteWeight / totalWaste;
+    const pctFlood = offFloodWeight / totalFlood;
     
     cnt.textContent = offCount;
     
-    // Both damage boxes update simultaneously with shared pct
+    // Each domain gets its own weighted percentage
     updateDamageBox({
       box: box1, accent: accent1, title: title1, pctEl: pct1, levelEl: level1, fill: fill1
-    }, pct, { base: '#B8442E' });
+    }, pctWaste, { base: '#B8442E' });
     
     updateDamageBox({
       box: box2, accent: accent2, title: title2, pctEl: pct2, levelEl: level2, fill: fill2
-    }, pct, { base: '#C85A35' });
+    }, pctFlood, { base: '#C85A35' });
   }
 
   dots.forEach(d => {
