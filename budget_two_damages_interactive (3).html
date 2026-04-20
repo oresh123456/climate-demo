@@ -14,15 +14,13 @@ body {
   padding: 20px;
 }
 .demo-container {
-  width: 100%; max-width: 1250px; background: white;
+  width: 100%; max-width: 1300px; background: white;
   border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   overflow: hidden;
 }
 .header {
-  background: white;
-  color: #4A4A2A;
-  padding: 18px 24px;
-  text-align: center;
+  background: white; color: #4A4A2A;
+  padding: 18px 24px; text-align: center;
   border-bottom: 1px solid #E5E5DC;
 }
 .header h1 { font-size: 20px; font-weight: 700; }
@@ -68,7 +66,37 @@ circle.fail-dot.off {
   50% { transform: scale(1.035); }
 }
 
-/* Selection tooltip */
+/* Zoom-in transition animation */
+.svg-wrap {
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1), 
+              opacity 0.4s ease;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+.svg-wrap.zooming-out {
+  transform: scale(6);
+  opacity: 0;
+  pointer-events: none;
+}
+.svg-wrap.zooming-in-start {
+  transform: scale(0.2);
+  opacity: 0;
+  transition: none;
+}
+.svg-wrap.zooming-in-active {
+  transform: scale(1);
+  opacity: 1;
+}
+/* Flash highlight on the clicked node during zoom */
+circle.fail-dot.zoom-target {
+  animation: zoom-flash 0.5s ease-out;
+}
+@keyframes zoom-flash {
+  0% { transform: scale(1); filter: saturate(1.15) drop-shadow(0 0 2.5px rgba(255,255,255,0.7)); }
+  50% { transform: scale(4); filter: saturate(2) drop-shadow(0 0 15px #D4A017); }
+  100% { transform: scale(8); filter: saturate(2) drop-shadow(0 0 25px #D4A017); opacity: 0; }
+}
+
 .selection-tooltip {
   position: fixed; z-index: 1000;
   background: #4A4A2A; color: white;
@@ -87,126 +115,169 @@ circle.fail-dot.off {
   border: 6px solid transparent;
   border-top-color: #4A4A2A; border-bottom: 0;
 }
-.selection-tooltip .dash-btn {
+.selection-tooltip .dive-btn {
   background: #D4A017; color: #3A2A00;
   border: none; padding: 4px 10px;
   border-radius: 4px; font-size: 11px; font-weight: 700;
   cursor: pointer; font-family: inherit;
   transition: background 0.15s;
 }
-.selection-tooltip .dash-btn:hover { background: #E8B923; }
+.selection-tooltip .dive-btn:hover { background: #E8B923; }
 
-/* Dashboard backdrop */
-.dashboard-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
-  z-index: 999; opacity: 0; pointer-events: none;
-  transition: opacity 0.25s ease;
+.subchain-banner {
+  display: none;
+  background: #4A4A2A; color: white;
+  padding: 10px 20px;
+  align-items: center; gap: 14px;
+  font-size: 13px;
 }
-.dashboard-backdrop.open { opacity: 1; pointer-events: auto; }
-
-/* Dashboard side panel */
-.dashboard-panel {
-  position: fixed; top: 0; bottom: 0; left: 0;
-  width: 440px; max-width: 92vw; background: #FAFAF5;
-  z-index: 1001; box-shadow: 4px 0 30px rgba(0,0,0,0.2);
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-  overflow-y: auto; display: flex; flex-direction: column;
-  direction: rtl;
+.subchain-banner.show { display: flex; }
+.subchain-banner .back-btn {
+  background: #D4A017; color: #3A2A00;
+  border: none; padding: 6px 14px; border-radius: 4px;
+  cursor: pointer; font-size: 12px; font-weight: 700;
+  font-family: inherit;
 }
-.dashboard-panel.open { transform: translateX(0); }
-
-.dashboard-header {
-  padding: 18px 20px 14px; background: #4A4A2A; color: white;
-  position: sticky; top: 0; z-index: 2;
-}
-.dashboard-header .close-btn {
-  position: absolute; top: 14px; left: 14px;
-  background: rgba(255,255,255,0.15); color: white;
-  border: none; width: 28px; height: 28px; border-radius: 50%;
-  cursor: pointer; font-size: 16px; line-height: 1;
-}
-.dashboard-header .close-btn:hover { background: rgba(255,255,255,0.25); }
-.dashboard-header h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; padding-left: 40px; }
-.dashboard-header .cat-tag {
-  display: inline-block; padding: 2px 8px; border-radius: 3px;
-  background: #D4A017; color: #3A2A00; font-size: 10px;
-  font-weight: 600; margin-top: 4px;
-}
-.dashboard-header .breadcrumb {
-  font-size: 10px; color: #D0D0C0; margin-top: 8px;
-}
-.dashboard-header .breadcrumb span {
+.subchain-banner .back-btn:hover { background: #E8B923; }
+.subchain-banner .crumbs { flex: 1; color: #CCC8B8; font-size: 11px; }
+.subchain-banner .crumbs .crumb-link {
   cursor: pointer; text-decoration: underline;
   text-decoration-style: dotted;
 }
-.dashboard-header .breadcrumb span:hover { color: #FFF; }
-.dashboard-header .breadcrumb .current { text-decoration: none; cursor: default; color: #FFF; font-weight: 600; }
+.subchain-banner .crumbs .crumb-link:hover { color: white; }
+.subchain-banner .crumbs .current { color: #D4A017; font-weight: 700; }
 
-.dashboard-body { padding: 16px 20px; flex: 1; }
-
-.dash-section {
-  background: white; border: 1px solid #E0E0D5;
-  border-radius: 6px; padding: 14px; margin-bottom: 12px;
+/* Dashboard button in banner */
+.subchain-banner .dash-btn {
+  background: #D4A017; color: #3A2A00;
+  border: none; padding: 6px 14px; border-radius: 4px;
+  cursor: pointer; font-size: 12px; font-weight: 700;
+  font-family: inherit;
+  transition: background 0.15s;
 }
-.dash-section h3 {
-  font-size: 12px; color: #4A4A2A; font-weight: 700;
+.subchain-banner .dash-btn:hover { background: #E8B923; }
+
+/* Dashboard page (third level) */
+.dashboard-banner {
+  display: none;
+  background: #3A2A5A; color: white;
+  padding: 10px 20px;
+  align-items: center; gap: 14px;
+  font-size: 13px;
+}
+.dashboard-banner.show { display: flex; }
+.dashboard-banner .back-btn {
+  background: #D4A017; color: #3A2A00;
+  border: none; padding: 6px 14px; border-radius: 4px;
+  cursor: pointer; font-size: 12px; font-weight: 700;
+  font-family: inherit;
+}
+.dashboard-banner .back-btn:hover { background: #E8B923; }
+.dashboard-banner .crumbs { flex: 1; color: #C8C0E0; font-size: 11px; }
+.dashboard-banner .crumbs .crumb-link {
+  cursor: pointer; text-decoration: underline;
+  text-decoration-style: dotted;
+}
+.dashboard-banner .crumbs .crumb-link:hover { color: white; }
+.dashboard-banner .crumbs .current { color: #D4A017; font-weight: 700; }
+
+.dashboard-wrap {
+  display: none;
+  background: #F5F3EC;
+  padding: 24px;
+  min-height: 520px;
+  direction: rtl;
+  transition: transform 0.55s cubic-bezier(0.5, 0, 0.75, 0), 
+              opacity 0.45s ease-out;
+  transform-origin: center center;
+  will-change: transform, opacity;
+}
+.dashboard-wrap.zooming-out {
+  transform: scale(5);
+  opacity: 0;
+  pointer-events: none;
+}
+.dashboard-wrap.zooming-in-start {
+  transform: scale(0.15);
+  opacity: 0;
+  transition: none;
+}
+.dashboard-wrap.zooming-in-active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.dashboard-title {
+  font-size: 22px; font-weight: 700; color: #3A2A5A;
+  margin-bottom: 4px;
+}
+.dashboard-subtitle {
+  font-size: 13px; color: #666; margin-bottom: 18px;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.dashboard-card {
+  background: white;
+  border: 1px solid #E0D8E8;
+  border-radius: 8px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.dashboard-card.wide { grid-column: span 2; }
+.dashboard-card.full { grid-column: span 3; }
+.dashboard-card h3 {
+  font-size: 13px; color: #3A2A5A; font-weight: 700;
   margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  border-bottom: 1px solid #E8E0F0; padding-bottom: 6px;
 }
+.kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kpi-box { background: #F5F3FA; padding: 8px 10px; border-radius: 5px; }
+.kpi-box .label { font-size: 10px; color: #7A6A9A; margin-bottom: 2px; }
+.kpi-box .value { font-size: 15px; font-weight: 700; color: #3A2A5A; }
+.kpi-box .bar { height: 4px; background: #E0D8E8; border-radius: 2px; margin-top: 4px; overflow: hidden; }
+.kpi-box .bar-fill { height: 100%; background: #7A5AB7; border-radius: 2px; }
 
-.kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.kpi-item {
-  background: #F5F5F0; padding: 8px 10px; border-radius: 4px;
-}
-.kpi-label { font-size: 10px; color: #7A7A6A; margin-bottom: 2px; }
-.kpi-value { font-size: 13px; font-weight: 700; color: #4A4A2A; }
-.kpi-bar {
-  height: 5px; background: #E0E0D5; border-radius: 3px;
-  margin-top: 4px; overflow: hidden;
-}
-.kpi-bar-fill { height: 100%; background: #D4A017; border-radius: 3px; }
-
-.node-chip {
-  display: inline-block; padding: 4px 9px;
-  background: #F0F0E8; border: 1px solid #D8D8CB;
-  border-radius: 12px; font-size: 11px; color: #4A4A2A;
-  margin: 2px 3px; cursor: pointer;
-  transition: all 0.15s ease;
-}
-.node-chip:hover {
-  background: #D4A017; color: white; border-color: #B8860B;
-}
-.node-chip.cat-event { border-right: 3px solid #3D9970; }
-.node-chip.cat-damage { border-right: 3px solid #D4A017; }
-.node-chip.cat-stakeholder { border-right: 3px solid #E87D4E; }
-
-.placeholder-chart {
+.chart-bars {
   display: flex; align-items: flex-end; gap: 3px;
-  height: 60px; padding: 6px; background: #F5F5F0; border-radius: 4px;
+  height: 80px; padding: 6px; background: #F5F3FA; border-radius: 4px;
 }
-.placeholder-chart .bar {
-  flex: 1; background: linear-gradient(to top, #D4A017, #E8B923);
+.chart-bars .bar {
+  flex: 1; background: linear-gradient(to top, #7A5AB7, #AFA9EC);
   border-radius: 2px 2px 0 0;
+  position: relative;
 }
 
-.placeholder-table {
-  width: 100%; font-size: 11px;
+.stake-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.stake-chip {
+  display: inline-block; padding: 3px 9px;
+  background: #EEEBF6; border: 1px solid #CECBF6;
+  border-radius: 10px; font-size: 11px; color: #3A2A5A;
 }
-.placeholder-table tr { border-bottom: 1px solid #E8E8E0; }
-.placeholder-table tr:last-child { border: 0; }
-.placeholder-table td { padding: 5px 0; color: #5A5A4A; }
-.placeholder-table td:last-child { text-align: left; font-weight: 600; color: #4A4A2A; }
+
+.data-table { width: 100%; font-size: 11px; }
+.data-table tr { border-bottom: 1px solid #EEEAF5; }
+.data-table tr:last-child { border: 0; }
+.data-table td { padding: 5px 0; color: #5A4A7A; }
+.data-table td:last-child { text-align: left; font-weight: 700; color: #3A2A5A; }
 
 .mock-note {
   font-size: 10px; color: #999; font-style: italic;
   text-align: center; padding: 6px; margin-top: 4px;
-  border-top: 1px dashed #D8D8CB;
 }
 
-.empty-state {
-  text-align: center; padding: 16px; color: #999;
-  font-size: 11px; font-style: italic;
+.alert-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.alert-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600;
 }
+.alert-pill.red { background: #FCEBEB; color: #A32D2D; border: 1px solid #F09595; }
+.alert-pill.amber { background: #FAEEDA; color: #854F0B; border: 1px solid #FAC775; }
+.alert-pill.green { background: #EAF3DE; color: #3B6D11; border: 1px solid #C0DD97; }
 </style>
 </head>
 <body>
@@ -215,7 +286,20 @@ circle.fail-dot.off {
     <h1>אדפטציה לשינויי אקלים - מניעת נזק לאומי</h1>
   </div>
   
-  <div class="svg-wrap">
+  <div class="subchain-banner" id="subchain-banner">
+    <button class="back-btn" onclick="closeSubchain()">← חזור לשרשרת הראשית</button>
+    <div class="crumbs" id="subchain-crumbs"></div>
+    <button class="dash-btn" onclick="openDashboard()">📊 דשבורד מפורט</button>
+  </div>
+  
+  <div class="dashboard-banner" id="dashboard-banner">
+    <button class="back-btn" onclick="closeDashboard()">← חזור לתת-שרשרת</button>
+    <div class="crumbs" id="dashboard-crumbs"></div>
+  </div>
+  
+  <div class="dashboard-wrap" id="dashboard-wrap"></div>
+  
+  <div class="svg-wrap" id="main-svg-wrap">
     <svg class="network-svg" viewBox="0 0 960 540" xmlns="http://www.w3.org/2000/svg">
       <rect x="0" y="0" width="960" height="540" fill="#E8E8E8"/>
       
@@ -225,331 +309,387 @@ circle.fail-dot.off {
       <path d="M0 380 Q240 360 480 380 T960 380" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
       <path d="M0 460 Q240 440 480 460 T960 460" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
       
-      <g transform="translate(140, 0)">
-        <line x1="164.4" y1="125.0" x2="246.0" y2="375.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.25"/>
-<line x1="164.4" y1="125.0" x2="243.4" y2="450.0" stroke="#5B8A72" stroke-width="0.36" opacity="0.25"/>
-<line x1="159.7" y1="150.0" x2="246.0" y2="375.0" stroke="#5B8A72" stroke-width="0.39" opacity="0.17"/>
-<line x1="161.1" y1="175.0" x2="243.4" y2="450.0" stroke="#5B8A72" stroke-width="0.58" opacity="0.23"/>
-<line x1="161.1" y1="175.0" x2="240.9" y2="300.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.24"/>
-<line x1="163.2" y1="200.0" x2="243.3" y2="275.0" stroke="#5B8A72" stroke-width="0.43" opacity="0.25"/>
-<line x1="158.3" y1="225.0" x2="242.1" y2="325.0" stroke="#5B8A72" stroke-width="0.46" opacity="0.22"/>
-<line x1="158.3" y1="225.0" x2="244.8" y2="250.0" stroke="#5B8A72" stroke-width="0.47" opacity="0.14"/>
-<line x1="155.0" y1="250.0" x2="243.4" y2="425.0" stroke="#5B8A72" stroke-width="0.36" opacity="0.24"/>
-<line x1="155.0" y1="250.0" x2="247.6" y2="125.0" stroke="#5B8A72" stroke-width="0.53" opacity="0.21"/>
-<line x1="164.2" y1="275.0" x2="240.9" y2="300.0" stroke="#5B8A72" stroke-width="0.35" opacity="0.24"/>
-<line x1="164.2" y1="275.0" x2="246.0" y2="375.0" stroke="#5B8A72" stroke-width="0.42" opacity="0.15"/>
-<line x1="157.4" y1="300.0" x2="244.8" y2="250.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.14"/>
-<line x1="157.4" y1="300.0" x2="243.3" y2="275.0" stroke="#5B8A72" stroke-width="0.62" opacity="0.16"/>
-<line x1="155.2" y1="325.0" x2="245.4" y2="200.0" stroke="#5B8A72" stroke-width="0.60" opacity="0.21"/>
-<line x1="155.2" y1="325.0" x2="245.4" y2="200.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.12"/>
-<line x1="159.9" y1="350.0" x2="245.4" y2="150.0" stroke="#5B8A72" stroke-width="0.47" opacity="0.15"/>
-<line x1="161.4" y1="375.0" x2="247.6" y2="225.0" stroke="#5B8A72" stroke-width="0.53" opacity="0.16"/>
-<line x1="161.4" y1="375.0" x2="242.1" y2="325.0" stroke="#5B8A72" stroke-width="0.41" opacity="0.24"/>
-<line x1="163.5" y1="400.0" x2="242.1" y2="325.0" stroke="#5B8A72" stroke-width="0.42" opacity="0.12"/>
-<line x1="155.6" y1="425.0" x2="242.1" y2="325.0" stroke="#5B8A72" stroke-width="0.62" opacity="0.12"/>
-<line x1="164.8" y1="450.0" x2="243.3" y2="275.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.24"/>
-<line x1="247.6" y1="125.0" x2="334.3" y2="450.0" stroke="#7A9E7E" stroke-width="0.42" opacity="0.21"/>
-<line x1="245.4" y1="150.0" x2="327.2" y2="350.0" stroke="#7A9E7E" stroke-width="0.41" opacity="0.16"/>
-<line x1="245.4" y1="150.0" x2="330.7" y2="375.0" stroke="#7A9E7E" stroke-width="0.39" opacity="0.22"/>
-<line x1="247.1" y1="175.0" x2="326.2" y2="275.0" stroke="#7A9E7E" stroke-width="0.41" opacity="0.19"/>
-<line x1="247.1" y1="175.0" x2="330.9" y2="225.0" stroke="#7A9E7E" stroke-width="0.49" opacity="0.24"/>
-<line x1="245.4" y1="200.0" x2="327.2" y2="350.0" stroke="#7A9E7E" stroke-width="0.30" opacity="0.14"/>
-<line x1="247.6" y1="225.0" x2="331.5" y2="125.0" stroke="#7A9E7E" stroke-width="0.69" opacity="0.22"/>
-<line x1="247.6" y1="225.0" x2="330.9" y2="225.0" stroke="#7A9E7E" stroke-width="0.47" opacity="0.14"/>
-<line x1="244.8" y1="250.0" x2="328.6" y2="325.0" stroke="#7A9E7E" stroke-width="0.51" opacity="0.24"/>
-<line x1="243.3" y1="275.0" x2="331.5" y2="125.0" stroke="#7A9E7E" stroke-width="0.39" opacity="0.15"/>
-<line x1="243.3" y1="275.0" x2="330.7" y2="300.0" stroke="#7A9E7E" stroke-width="0.56" opacity="0.10"/>
-<line x1="240.9" y1="300.0" x2="331.5" y2="125.0" stroke="#7A9E7E" stroke-width="0.49" opacity="0.14"/>
-<line x1="240.9" y1="300.0" x2="328.6" y2="175.0" stroke="#7A9E7E" stroke-width="0.39" opacity="0.24"/>
-<line x1="242.1" y1="325.0" x2="331.5" y2="125.0" stroke="#7A9E7E" stroke-width="0.31" opacity="0.14"/>
-<line x1="248.4" y1="350.0" x2="330.9" y2="225.0" stroke="#7A9E7E" stroke-width="0.47" opacity="0.10"/>
-<line x1="246.0" y1="375.0" x2="328.6" y2="325.0" stroke="#7A9E7E" stroke-width="0.48" opacity="0.24"/>
-<line x1="244.9" y1="400.0" x2="329.3" y2="400.0" stroke="#7A9E7E" stroke-width="0.56" opacity="0.18"/>
-<line x1="243.4" y1="425.0" x2="328.0" y2="200.0" stroke="#7A9E7E" stroke-width="0.39" opacity="0.13"/>
-<line x1="243.4" y1="425.0" x2="326.2" y2="275.0" stroke="#7A9E7E" stroke-width="0.46" opacity="0.16"/>
-<line x1="243.4" y1="450.0" x2="331.9" y2="425.0" stroke="#7A9E7E" stroke-width="0.55" opacity="0.17"/>
-<line x1="243.4" y1="450.0" x2="328.6" y2="175.0" stroke="#7A9E7E" stroke-width="0.44" opacity="0.17"/>
-<line x1="331.5" y1="125.0" x2="412.3" y2="125.0" stroke="#B8860B" stroke-width="0.50" opacity="0.10"/>
-<line x1="334.5" y1="150.0" x2="413.7" y2="175.0" stroke="#B8860B" stroke-width="0.63" opacity="0.16"/>
-<line x1="328.6" y1="175.0" x2="415.3" y2="225.0" stroke="#B8860B" stroke-width="0.65" opacity="0.17"/>
-<line x1="328.0" y1="200.0" x2="410.7" y2="425.0" stroke="#B8860B" stroke-width="0.46" opacity="0.20"/>
-<line x1="330.9" y1="225.0" x2="415.3" y2="225.0" stroke="#B8860B" stroke-width="0.44" opacity="0.13"/>
-<line x1="330.2" y1="250.0" x2="415.3" y2="225.0" stroke="#B8860B" stroke-width="0.68" opacity="0.19"/>
-<line x1="330.2" y1="250.0" x2="410.7" y2="425.0" stroke="#B8860B" stroke-width="0.53" opacity="0.23"/>
-<line x1="326.2" y1="275.0" x2="412.0" y2="400.0" stroke="#B8860B" stroke-width="0.55" opacity="0.17"/>
-<line x1="330.7" y1="300.0" x2="414.6" y2="150.0" stroke="#B8860B" stroke-width="0.63" opacity="0.22"/>
-<line x1="330.7" y1="300.0" x2="415.5" y2="350.0" stroke="#B8860B" stroke-width="0.50" opacity="0.15"/>
-<line x1="328.6" y1="325.0" x2="412.3" y2="125.0" stroke="#B8860B" stroke-width="0.66" opacity="0.23"/>
-<line x1="327.2" y1="350.0" x2="410.7" y2="425.0" stroke="#B8860B" stroke-width="0.65" opacity="0.16"/>
-<line x1="327.2" y1="350.0" x2="415.3" y2="225.0" stroke="#B8860B" stroke-width="0.37" opacity="0.19"/>
-<line x1="330.7" y1="375.0" x2="419.4" y2="450.0" stroke="#B8860B" stroke-width="0.53" opacity="0.15"/>
-<line x1="330.7" y1="375.0" x2="411.4" y2="325.0" stroke="#B8860B" stroke-width="0.58" opacity="0.23"/>
-<line x1="329.3" y1="400.0" x2="414.6" y2="150.0" stroke="#B8860B" stroke-width="0.45" opacity="0.24"/>
-<line x1="331.9" y1="425.0" x2="417.3" y2="200.0" stroke="#B8860B" stroke-width="0.50" opacity="0.19"/>
-<line x1="334.3" y1="450.0" x2="415.5" y2="350.0" stroke="#B8860B" stroke-width="0.51" opacity="0.23"/>
-<line x1="334.3" y1="450.0" x2="415.5" y2="350.0" stroke="#B8860B" stroke-width="0.37" opacity="0.19"/>
-<line x1="412.3" y1="125.0" x2="504.8" y2="320.0" stroke="#C75B39" stroke-width="0.37" opacity="0.24"/>
-<line x1="412.3" y1="125.0" x2="498.5" y2="406.7" stroke="#C75B39" stroke-width="0.62" opacity="0.16"/>
-<line x1="414.6" y1="150.0" x2="504.4" y2="168.3" stroke="#C75B39" stroke-width="0.58" opacity="0.23"/>
-<line x1="414.6" y1="150.0" x2="495.7" y2="276.7" stroke="#C75B39" stroke-width="0.65" opacity="0.18"/>
-<line x1="413.7" y1="175.0" x2="499.5" y2="298.3" stroke="#C75B39" stroke-width="0.69" opacity="0.19"/>
-<line x1="413.7" y1="175.0" x2="504.4" y2="168.3" stroke="#C75B39" stroke-width="0.30" opacity="0.18"/>
-<line x1="417.3" y1="200.0" x2="502.3" y2="385.0" stroke="#C75B39" stroke-width="0.46" opacity="0.16"/>
-<line x1="417.3" y1="200.0" x2="495.3" y2="125.0" stroke="#C75B39" stroke-width="0.31" opacity="0.13"/>
-<line x1="415.3" y1="225.0" x2="498.5" y2="406.7" stroke="#C75B39" stroke-width="0.37" opacity="0.18"/>
-<line x1="415.3" y1="225.0" x2="496.5" y2="428.3" stroke="#C75B39" stroke-width="0.42" opacity="0.21"/>
-<line x1="415.5" y1="250.0" x2="499.9" y2="255.0" stroke="#C75B39" stroke-width="0.62" opacity="0.18"/>
-<line x1="418.8" y1="275.0" x2="501.4" y2="341.7" stroke="#C75B39" stroke-width="0.65" opacity="0.13"/>
-<line x1="418.8" y1="275.0" x2="501.5" y2="363.3" stroke="#C75B39" stroke-width="0.63" opacity="0.16"/>
-<line x1="412.1" y1="300.0" x2="496.5" y2="428.3" stroke="#C75B39" stroke-width="0.30" opacity="0.21"/>
-<line x1="412.1" y1="300.0" x2="503.6" y2="146.7" stroke="#C75B39" stroke-width="0.69" opacity="0.13"/>
-<line x1="411.4" y1="325.0" x2="504.4" y2="168.3" stroke="#C75B39" stroke-width="0.31" opacity="0.25"/>
-<line x1="415.5" y1="350.0" x2="504.4" y2="168.3" stroke="#C75B39" stroke-width="0.42" opacity="0.16"/>
-<line x1="415.5" y1="350.0" x2="499.5" y2="298.3" stroke="#C75B39" stroke-width="0.31" opacity="0.23"/>
-<line x1="417.7" y1="375.0" x2="498.5" y2="406.7" stroke="#C75B39" stroke-width="0.49" opacity="0.13"/>
-<line x1="417.7" y1="375.0" x2="499.5" y2="298.3" stroke="#C75B39" stroke-width="0.34" opacity="0.10"/>
-<line x1="412.0" y1="400.0" x2="504.9" y2="190.0" stroke="#C75B39" stroke-width="0.63" opacity="0.22"/>
-<line x1="410.7" y1="425.0" x2="499.5" y2="298.3" stroke="#C75B39" stroke-width="0.69" opacity="0.23"/>
-<line x1="419.4" y1="450.0" x2="499.5" y2="298.3" stroke="#C75B39" stroke-width="0.55" opacity="0.10"/>
-<line x1="419.4" y1="450.0" x2="504.8" y2="320.0" stroke="#C75B39" stroke-width="0.58" opacity="0.17"/>
-<line x1="95" y1="290" x2="155.0" y2="250.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.19"/>
-<line x1="95" y1="290" x2="159.7" y2="150.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.14"/>
-<line x1="95" y1="290" x2="159.7" y2="150.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.22"/>
-<line x1="95" y1="290" x2="155.6" y2="425.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.24"/>
-<line x1="95" y1="290" x2="161.4" y2="375.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.15"/>
-<line x1="95" y1="290" x2="155.0" y2="250.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.14"/>
+      <g transform="translate(155, 0)">
+<line x1="148.1" y1="125.0" x2="222.7" y2="375.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.25"/>
+<line x1="148.1" y1="125.0" x2="220.9" y2="450.0" stroke="#5B8A72" stroke-width="0.36" opacity="0.25"/>
+<line x1="144.8" y1="150.0" x2="222.7" y2="375.0" stroke="#5B8A72" stroke-width="0.39" opacity="0.17"/>
+<line x1="145.8" y1="175.0" x2="220.9" y2="450.0" stroke="#5B8A72" stroke-width="0.58" opacity="0.23"/>
+<line x1="145.8" y1="175.0" x2="219.2" y2="300.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.24"/>
+<line x1="147.2" y1="200.0" x2="220.8" y2="275.0" stroke="#5B8A72" stroke-width="0.43" opacity="0.25"/>
+<line x1="143.8" y1="225.0" x2="220.0" y2="325.0" stroke="#5B8A72" stroke-width="0.46" opacity="0.22"/>
+<line x1="143.8" y1="225.0" x2="221.8" y2="250.0" stroke="#5B8A72" stroke-width="0.47" opacity="0.14"/>
+<line x1="141.5" y1="250.0" x2="220.9" y2="425.0" stroke="#5B8A72" stroke-width="0.36" opacity="0.24"/>
+<line x1="141.5" y1="250.0" x2="223.9" y2="125.0" stroke="#5B8A72" stroke-width="0.53" opacity="0.21"/>
+<line x1="148.0" y1="275.0" x2="219.2" y2="300.0" stroke="#5B8A72" stroke-width="0.35" opacity="0.24"/>
+<line x1="148.0" y1="275.0" x2="222.7" y2="375.0" stroke="#5B8A72" stroke-width="0.42" opacity="0.15"/>
+<line x1="143.2" y1="300.0" x2="221.8" y2="250.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.14"/>
+<line x1="143.2" y1="300.0" x2="220.8" y2="275.0" stroke="#5B8A72" stroke-width="0.62" opacity="0.16"/>
+<line x1="141.7" y1="325.0" x2="222.3" y2="200.0" stroke="#5B8A72" stroke-width="0.60" opacity="0.21"/>
+<line x1="141.7" y1="325.0" x2="222.3" y2="200.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.12"/>
+<line x1="144.9" y1="350.0" x2="222.3" y2="150.0" stroke="#5B8A72" stroke-width="0.47" opacity="0.15"/>
+<line x1="146.0" y1="375.0" x2="223.8" y2="225.0" stroke="#5B8A72" stroke-width="0.53" opacity="0.16"/>
+<line x1="146.0" y1="375.0" x2="220.0" y2="325.0" stroke="#5B8A72" stroke-width="0.41" opacity="0.24"/>
+<line x1="147.4" y1="400.0" x2="220.0" y2="325.0" stroke="#5B8A72" stroke-width="0.42" opacity="0.12"/>
+<line x1="141.9" y1="425.0" x2="220.0" y2="325.0" stroke="#5B8A72" stroke-width="0.62" opacity="0.12"/>
+<line x1="148.3" y1="450.0" x2="220.8" y2="275.0" stroke="#5B8A72" stroke-width="0.67" opacity="0.24"/>
+<line x1="223.9" y1="125.0" x2="302.0" y2="450.0" stroke="#7A9E7E" stroke-width="0.42" opacity="0.21"/>
+<line x1="222.3" y1="150.0" x2="297.0" y2="350.0" stroke="#7A9E7E" stroke-width="0.41" opacity="0.16"/>
+<line x1="222.3" y1="150.0" x2="299.5" y2="375.0" stroke="#7A9E7E" stroke-width="0.39" opacity="0.22"/>
+<line x1="223.4" y1="175.0" x2="296.3" y2="275.0" stroke="#7A9E7E" stroke-width="0.41" opacity="0.19"/>
+<line x1="223.4" y1="175.0" x2="299.6" y2="225.0" stroke="#7A9E7E" stroke-width="0.49" opacity="0.24"/>
+<line x1="222.3" y1="200.0" x2="297.0" y2="350.0" stroke="#7A9E7E" stroke-width="0.30" opacity="0.14"/>
+<line x1="223.8" y1="225.0" x2="300.0" y2="125.0" stroke="#7A9E7E" stroke-width="0.69" opacity="0.22"/>
+<line x1="223.8" y1="225.0" x2="299.6" y2="225.0" stroke="#7A9E7E" stroke-width="0.47" opacity="0.14"/>
+<line x1="221.8" y1="250.0" x2="298.0" y2="325.0" stroke="#7A9E7E" stroke-width="0.51" opacity="0.24"/>
+<line x1="220.8" y1="275.0" x2="300.0" y2="125.0" stroke="#7A9E7E" stroke-width="0.39" opacity="0.15"/>
+<line x1="220.8" y1="275.0" x2="299.5" y2="300.0" stroke="#7A9E7E" stroke-width="0.56" opacity="0.10"/>
+<line x1="219.2" y1="300.0" x2="300.0" y2="125.0" stroke="#7A9E7E" stroke-width="0.49" opacity="0.14"/>
+<line x1="219.2" y1="300.0" x2="298.0" y2="175.0" stroke="#7A9E7E" stroke-width="0.39" opacity="0.24"/>
+<line x1="220.0" y1="325.0" x2="300.0" y2="125.0" stroke="#7A9E7E" stroke-width="0.31" opacity="0.14"/>
+<line x1="224.4" y1="350.0" x2="299.6" y2="225.0" stroke="#7A9E7E" stroke-width="0.47" opacity="0.10"/>
+<line x1="222.7" y1="375.0" x2="298.0" y2="325.0" stroke="#7A9E7E" stroke-width="0.48" opacity="0.24"/>
+<line x1="221.9" y1="400.0" x2="298.5" y2="400.0" stroke="#7A9E7E" stroke-width="0.56" opacity="0.18"/>
+<line x1="220.9" y1="425.0" x2="297.6" y2="200.0" stroke="#7A9E7E" stroke-width="0.39" opacity="0.13"/>
+<line x1="220.9" y1="425.0" x2="296.3" y2="275.0" stroke="#7A9E7E" stroke-width="0.46" opacity="0.16"/>
+<line x1="220.9" y1="450.0" x2="300.4" y2="425.0" stroke="#7A9E7E" stroke-width="0.55" opacity="0.17"/>
+<line x1="220.9" y1="450.0" x2="298.0" y2="175.0" stroke="#7A9E7E" stroke-width="0.44" opacity="0.17"/>
+<line x1="300.0" y1="125.0" x2="374.1" y2="125.0" stroke="#B8860B" stroke-width="0.50" opacity="0.10"/>
+<line x1="302.1" y1="150.0" x2="375.1" y2="175.0" stroke="#B8860B" stroke-width="0.63" opacity="0.16"/>
+<line x1="298.0" y1="175.0" x2="376.2" y2="225.0" stroke="#B8860B" stroke-width="0.65" opacity="0.17"/>
+<line x1="297.6" y1="200.0" x2="373.0" y2="425.0" stroke="#B8860B" stroke-width="0.46" opacity="0.20"/>
+<line x1="299.6" y1="225.0" x2="376.2" y2="225.0" stroke="#B8860B" stroke-width="0.44" opacity="0.13"/>
+<line x1="299.2" y1="250.0" x2="376.2" y2="225.0" stroke="#B8860B" stroke-width="0.68" opacity="0.19"/>
+<line x1="299.2" y1="250.0" x2="373.0" y2="425.0" stroke="#B8860B" stroke-width="0.53" opacity="0.23"/>
+<line x1="296.3" y1="275.0" x2="373.9" y2="400.0" stroke="#B8860B" stroke-width="0.55" opacity="0.17"/>
+<line x1="299.5" y1="300.0" x2="375.7" y2="150.0" stroke="#B8860B" stroke-width="0.63" opacity="0.22"/>
+<line x1="299.5" y1="300.0" x2="376.4" y2="350.0" stroke="#B8860B" stroke-width="0.50" opacity="0.15"/>
+<line x1="298.0" y1="325.0" x2="374.1" y2="125.0" stroke="#B8860B" stroke-width="0.66" opacity="0.23"/>
+<line x1="297.0" y1="350.0" x2="373.0" y2="425.0" stroke="#B8860B" stroke-width="0.65" opacity="0.16"/>
+<line x1="297.0" y1="350.0" x2="376.2" y2="225.0" stroke="#B8860B" stroke-width="0.37" opacity="0.19"/>
+<line x1="299.5" y1="375.0" x2="379.0" y2="450.0" stroke="#B8860B" stroke-width="0.53" opacity="0.15"/>
+<line x1="299.5" y1="375.0" x2="373.5" y2="325.0" stroke="#B8860B" stroke-width="0.58" opacity="0.23"/>
+<line x1="298.5" y1="400.0" x2="375.7" y2="150.0" stroke="#B8860B" stroke-width="0.45" opacity="0.24"/>
+<line x1="300.4" y1="425.0" x2="377.6" y2="200.0" stroke="#B8860B" stroke-width="0.50" opacity="0.19"/>
+<line x1="302.0" y1="450.0" x2="376.4" y2="350.0" stroke="#B8860B" stroke-width="0.51" opacity="0.23"/>
+<line x1="302.0" y1="450.0" x2="376.4" y2="350.0" stroke="#B8860B" stroke-width="0.37" opacity="0.19"/>
+<line x1="374.1" y1="125.0" x2="454.1" y2="313.2" stroke="#C08550" stroke-width="0.37" opacity="0.24"/>
+<line x1="374.1" y1="125.0" x2="453.5" y2="398.7" stroke="#C08550" stroke-width="0.62" opacity="0.16"/>
+<line x1="375.7" y1="150.0" x2="456.1" y2="159.2" stroke="#C08550" stroke-width="0.58" opacity="0.23"/>
+<line x1="375.7" y1="150.0" x2="456.4" y2="278.9" stroke="#C08550" stroke-width="0.65" opacity="0.18"/>
+<line x1="375.1" y1="175.0" x2="454.0" y2="296.1" stroke="#C08550" stroke-width="0.69" opacity="0.19"/>
+<line x1="375.1" y1="175.0" x2="456.4" y2="176.3" stroke="#C08550" stroke-width="0.30" opacity="0.18"/>
+<line x1="377.6" y1="200.0" x2="453.7" y2="381.6" stroke="#C08550" stroke-width="0.46" opacity="0.16"/>
+<line x1="377.6" y1="200.0" x2="449.7" y2="125.0" stroke="#C08550" stroke-width="0.31" opacity="0.13"/>
+<line x1="376.2" y1="225.0" x2="453.5" y2="398.7" stroke="#C08550" stroke-width="0.37" opacity="0.18"/>
+<line x1="376.2" y1="225.0" x2="451.2" y2="415.8" stroke="#C08550" stroke-width="0.42" opacity="0.21"/>
+<line x1="376.4" y1="250.0" x2="452.6" y2="261.8" stroke="#C08550" stroke-width="0.62" opacity="0.18"/>
+<line x1="378.6" y1="275.0" x2="454.6" y2="330.3" stroke="#C08550" stroke-width="0.65" opacity="0.13"/>
+<line x1="378.6" y1="275.0" x2="450.6" y2="364.5" stroke="#C08550" stroke-width="0.63" opacity="0.16"/>
+<line x1="374.0" y1="300.0" x2="452.1" y2="432.9" stroke="#C08550" stroke-width="0.30" opacity="0.21"/>
+<line x1="374.0" y1="300.0" x2="456.1" y2="159.2" stroke="#C08550" stroke-width="0.69" opacity="0.13"/>
+<line x1="373.5" y1="325.0" x2="456.4" y2="176.3" stroke="#C08550" stroke-width="0.31" opacity="0.25"/>
+<line x1="376.4" y1="350.0" x2="456.1" y2="159.2" stroke="#C08550" stroke-width="0.42" opacity="0.16"/>
+<line x1="376.4" y1="350.0" x2="454.0" y2="296.1" stroke="#C08550" stroke-width="0.31" opacity="0.23"/>
+<line x1="377.9" y1="375.0" x2="453.5" y2="398.7" stroke="#C08550" stroke-width="0.49" opacity="0.13"/>
+<line x1="377.9" y1="375.0" x2="454.0" y2="296.1" stroke="#C08550" stroke-width="0.34" opacity="0.10"/>
+<line x1="373.9" y1="400.0" x2="455.4" y2="193.4" stroke="#C08550" stroke-width="0.63" opacity="0.22"/>
+<line x1="373.0" y1="425.0" x2="454.0" y2="296.1" stroke="#C08550" stroke-width="0.69" opacity="0.23"/>
+<line x1="379.0" y1="450.0" x2="454.1" y2="313.2" stroke="#C08550" stroke-width="0.55" opacity="0.10"/>
+<line x1="379.0" y1="450.0" x2="454.6" y2="330.3" stroke="#C08550" stroke-width="0.58" opacity="0.17"/>
+<line x1="449.7" y1="125.0" x2="529.8" y2="225.0" stroke="#C75B39" stroke-width="0.31" opacity="0.10"/>
+<line x1="449.7" y1="125.0" x2="531.4" y2="150.0" stroke="#C75B39" stroke-width="0.43" opacity="0.22"/>
+<line x1="455.5" y1="142.1" x2="531.4" y2="150.0" stroke="#C75B39" stroke-width="0.34" opacity="0.14"/>
+<line x1="456.1" y1="159.2" x2="533.1" y2="300.0" stroke="#C75B39" stroke-width="0.53" opacity="0.17"/>
+<line x1="456.4" y1="176.3" x2="527.4" y2="325.0" stroke="#C75B39" stroke-width="0.60" opacity="0.22"/>
+<line x1="455.4" y1="193.4" x2="529.2" y2="400.0" stroke="#C75B39" stroke-width="0.58" opacity="0.25"/>
+<line x1="453.0" y1="210.5" x2="531.8" y2="175.0" stroke="#C75B39" stroke-width="0.43" opacity="0.20"/>
+<line x1="453.0" y1="210.5" x2="527.0" y2="250.0" stroke="#C75B39" stroke-width="0.38" opacity="0.18"/>
+<line x1="452.9" y1="227.6" x2="526.6" y2="350.0" stroke="#C75B39" stroke-width="0.35" opacity="0.10"/>
+<line x1="452.9" y1="227.6" x2="527.4" y2="325.0" stroke="#C75B39" stroke-width="0.36" opacity="0.21"/>
+<line x1="450.0" y1="244.7" x2="532.1" y2="375.0" stroke="#C75B39" stroke-width="0.38" opacity="0.12"/>
+<line x1="450.0" y1="244.7" x2="527.0" y2="250.0" stroke="#C75B39" stroke-width="0.47" opacity="0.21"/>
+<line x1="452.6" y1="261.8" x2="528.3" y2="200.0" stroke="#C75B39" stroke-width="0.63" opacity="0.18"/>
+<line x1="456.4" y1="278.9" x2="527.4" y2="325.0" stroke="#C75B39" stroke-width="0.56" opacity="0.21"/>
+<line x1="454.0" y1="296.1" x2="528.3" y2="200.0" stroke="#C75B39" stroke-width="0.38" opacity="0.21"/>
+<line x1="454.0" y1="296.1" x2="527.0" y2="250.0" stroke="#C75B39" stroke-width="0.48" opacity="0.13"/>
+<line x1="454.1" y1="313.2" x2="530.1" y2="450.0" stroke="#C75B39" stroke-width="0.36" opacity="0.15"/>
+<line x1="454.1" y1="313.2" x2="531.8" y2="175.0" stroke="#C75B39" stroke-width="0.70" opacity="0.22"/>
+<line x1="454.6" y1="330.3" x2="533.1" y2="300.0" stroke="#C75B39" stroke-width="0.47" opacity="0.12"/>
+<line x1="454.6" y1="330.3" x2="530.1" y2="450.0" stroke="#C75B39" stroke-width="0.65" opacity="0.20"/>
+<line x1="451.9" y1="347.4" x2="529.8" y2="225.0" stroke="#C75B39" stroke-width="0.48" opacity="0.13"/>
+<line x1="450.6" y1="364.5" x2="528.3" y2="200.0" stroke="#C75B39" stroke-width="0.44" opacity="0.22"/>
+<line x1="453.7" y1="381.6" x2="533.5" y2="275.0" stroke="#C75B39" stroke-width="0.48" opacity="0.20"/>
+<line x1="453.5" y1="398.7" x2="527.4" y2="325.0" stroke="#C75B39" stroke-width="0.70" opacity="0.13"/>
+<line x1="453.5" y1="398.7" x2="532.1" y2="375.0" stroke="#C75B39" stroke-width="0.56" opacity="0.17"/>
+<line x1="451.2" y1="415.8" x2="533.5" y2="275.0" stroke="#C75B39" stroke-width="0.65" opacity="0.12"/>
+<line x1="451.2" y1="415.8" x2="526.6" y2="350.0" stroke="#C75B39" stroke-width="0.41" opacity="0.15"/>
+<line x1="452.1" y1="432.9" x2="528.3" y2="200.0" stroke="#C75B39" stroke-width="0.52" opacity="0.16"/>
+<line x1="450.8" y1="450.0" x2="533.5" y2="275.0" stroke="#C75B39" stroke-width="0.44" opacity="0.17"/>
+<line x1="85" y1="290" x2="141.5" y2="250.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.19"/>
+<line x1="85" y1="290" x2="144.8" y2="150.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.14"/>
+<line x1="85" y1="290" x2="144.8" y2="150.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.22"/>
+<line x1="85" y1="290" x2="141.9" y2="425.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.24"/>
+<line x1="85" y1="290" x2="146.0" y2="375.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.15"/>
+<line x1="85" y1="290" x2="141.5" y2="250.0" stroke="#5B8A72" stroke-width="0.5" opacity="0.14"/>
 
-        <line x1="495.3" y1="125.0" x2="545" y2="290" stroke="#D4A017" stroke-width="1.68" opacity="0.72"/>
-<line x1="503.6" y1="146.7" x2="545" y2="290" stroke="#D4A017" stroke-width="1.58" opacity="0.61"/>
-<line x1="504.4" y1="168.3" x2="545" y2="290" stroke="#D4A017" stroke-width="1.35" opacity="0.49"/>
-<line x1="504.9" y1="190.0" x2="545" y2="290" stroke="#D4A017" stroke-width="1.21" opacity="0.78"/>
-<line x1="503.5" y1="211.7" x2="545" y2="290" stroke="#D4A017" stroke-width="1.09" opacity="0.60"/>
-<line x1="500.0" y1="233.3" x2="545" y2="290" stroke="#D4A017" stroke-width="1.60" opacity="0.72"/>
-<line x1="499.9" y1="255.0" x2="545" y2="290" stroke="#D4A017" stroke-width="1.38" opacity="0.79"/>
-<line x1="495.7" y1="276.7" x2="545" y2="290" stroke="#D4A017" stroke-width="1.01" opacity="0.53"/>
-<line x1="499.5" y1="298.3" x2="545" y2="290" stroke="#D4A017" stroke-width="1.09" opacity="0.57"/>
-<line x1="504.8" y1="320.0" x2="545" y2="290" stroke="#D4A017" stroke-width="1.44" opacity="0.54"/>
-<line x1="501.4" y1="341.7" x2="545" y2="290" stroke="#D4A017" stroke-width="1.30" opacity="0.62"/>
-<line x1="501.5" y1="363.3" x2="545" y2="290" stroke="#D4A017" stroke-width="1.31" opacity="0.49"/>
-<line x1="502.3" y1="385.0" x2="545" y2="290" stroke="#D4A017" stroke-width="1.42" opacity="0.67"/>
-<line x1="498.5" y1="406.7" x2="545" y2="290" stroke="#D4A017" stroke-width="1.34" opacity="0.57"/>
-<line x1="496.5" y1="428.3" x2="545" y2="290" stroke="#D4A017" stroke-width="1.61" opacity="0.65"/>
-<line x1="501.0" y1="450.0" x2="545" y2="290" stroke="#D4A017" stroke-width="1.25" opacity="0.65"/>
+<line x1="529.3" y1="125.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.68" opacity="0.72"/>
+<line x1="531.4" y1="150.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.58" opacity="0.61"/>
+<line x1="531.8" y1="175.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.35" opacity="0.49"/>
+<line x1="528.3" y1="200.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.21" opacity="0.78"/>
+<line x1="529.8" y1="225.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.09" opacity="0.60"/>
+<line x1="527.0" y1="250.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.60" opacity="0.72"/>
+<line x1="533.5" y1="275.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.38" opacity="0.79"/>
+<line x1="533.1" y1="300.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.01" opacity="0.53"/>
+<line x1="527.4" y1="325.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.09" opacity="0.57"/>
+<line x1="526.6" y1="350.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.44" opacity="0.54"/>
+<line x1="532.1" y1="375.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.30" opacity="0.62"/>
+<line x1="529.2" y1="400.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.31" opacity="0.49"/>
+<line x1="532.6" y1="425.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.42" opacity="0.67"/>
+<line x1="530.1" y1="450.0" x2="575" y2="290" stroke="#D4A017" stroke-width="1.34" opacity="0.57"/>
 
-        <line x1="160" y1="115" x2="160" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
-        <line x1="245" y1="115" x2="245" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
-        <line x1="330" y1="115" x2="330" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
-        <line x1="415" y1="115" x2="415" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
-        <line x1="500" y1="115" x2="500" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
-        
-        <text x="164.4" y="118.6" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">ריבוי גשמים</text>
-<circle class="fail-dot" data-node-id="1-0" data-clicked="false" cx="164.4" cy="125.0" r="3.4" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="159.7" y="144.0" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">שריפות יער</text>
-<circle class="fail-dot" data-node-id="1-1" data-clicked="false" cx="159.7" cy="150.0" r="3.0" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="161.1" y="168.1" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">שריפות עיר</text>
-<circle class="fail-dot" data-node-id="1-2" data-clicked="false" cx="161.1" cy="175.0" r="3.9" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="163.2" y="192.8" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">גלי חום</text>
-<circle class="fail-dot" data-node-id="1-3" data-clicked="false" cx="163.2" cy="200.0" r="4.2" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="158.3" y="217.5" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">בצורת</text>
-<circle class="fail-dot" data-node-id="1-4" data-clicked="false" cx="158.3" cy="225.0" r="4.5" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="155.0" y="243.9" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">סופות חול</text>
-<circle class="fail-dot" data-node-id="1-5" data-clicked="false" cx="155.0" cy="250.0" r="3.1" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="164.2" y="267.2" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">סופות רעם</text>
-<circle class="fail-dot" data-node-id="1-6" data-clicked="false" cx="164.2" cy="275.0" r="4.8" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="157.4" y="293.2" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">ברד</text>
-<circle class="fail-dot" data-node-id="1-7" data-clicked="false" cx="157.4" cy="300.0" r="3.8" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="155.2" y="317.4" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">שטפונות</text>
-<circle class="fail-dot" data-node-id="1-8" data-clicked="false" cx="155.2" cy="325.0" r="4.6" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="159.9" y="342.2" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">הצפות פתע</text>
-<circle class="fail-dot" data-node-id="1-9" data-clicked="false" cx="159.9" cy="350.0" r="4.8" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="161.4" y="367.6" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">עליית ים</text>
-<circle class="fail-dot" data-node-id="1-10" data-clicked="false" cx="161.4" cy="375.0" r="4.4" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="163.5" y="392.3" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">סחף קרקע</text>
-<circle class="fail-dot" data-node-id="1-11" data-clicked="false" cx="163.5" cy="400.0" r="4.7" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="155.6" y="417.3" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">מדבור</text>
-<circle class="fail-dot" data-node-id="1-12" data-clicked="false" cx="155.6" cy="425.0" r="4.7" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="164.8" y="443.6" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">התייבשות</text>
-<circle class="fail-dot" data-node-id="1-13" data-clicked="false" cx="164.8" cy="450.0" r="3.4" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
-<text x="247.6" y="118.0" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">אובך כבד</text>
-<circle class="fail-dot" data-node-id="2-0" data-clicked="false" cx="247.6" cy="125.0" r="4.0" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
-<text x="245.4" y="143.4" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">שינוי עונות</text>
-<circle class="fail-dot" data-node-id="2-1" data-clicked="false" cx="245.4" cy="150.0" r="3.6" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
-<text x="247.1" y="168.6" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">מחסור מים</text>
-<circle class="fail-dot" data-node-id="2-2" data-clicked="false" cx="247.1" cy="175.0" r="3.4" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
-<text x="245.4" y="193.0" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">חום ממושך</text>
-<circle class="fail-dot" data-node-id="2-3" data-clicked="false" cx="245.4" cy="200.0" r="4.0" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
-<text x="247.6" y="218.2" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">יובש ממשך</text>
-<circle class="fail-dot" data-node-id="2-4" data-clicked="false" cx="247.6" cy="225.0" r="3.8" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
-<text x="244.8" y="242.7" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">שינוי משקעים</text>
-<circle class="fail-dot" data-node-id="2-5" data-clicked="false" cx="244.8" cy="250.0" r="4.3" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
-<text x="243.3" y="267.3" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">ברד חורפי</text>
-<circle class="fail-dot" data-node-id="2-6" data-clicked="false" cx="243.3" cy="275.0" r="4.7" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
-<text x="240.9" y="293.4" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">סופת חריגה</text>
-<circle class="fail-dot" data-node-id="2-7" data-clicked="false" cx="240.9" cy="300.0" r="3.6" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
-<text x="242.1" y="317.9" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">גשם חומצי</text>
-<circle class="fail-dot" data-node-id="2-8" data-clicked="false" cx="242.1" cy="325.0" r="4.1" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
-<text x="248.4" y="343.5" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">מזג קיצוני</text>
-<circle class="fail-dot" data-node-id="2-9" data-clicked="false" cx="248.4" cy="350.0" r="3.5" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
-<text x="246.0" y="368.9" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">אקלים מופרע</text>
-<circle class="fail-dot" data-node-id="2-10" data-clicked="false" cx="246.0" cy="375.0" r="3.1" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
-<text x="244.9" y="393.0" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">התחממות</text>
-<circle class="fail-dot" data-node-id="2-11" data-clicked="false" cx="244.9" cy="400.0" r="4.0" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
-<text x="243.4" y="417.5" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">טמפ' חריגה</text>
-<circle class="fail-dot" data-node-id="2-12" data-clicked="false" cx="243.4" cy="425.0" r="4.5" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
-<text x="243.4" y="443.0" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="6.5" pointer-events="none">העלמת עונות</text>
-<circle class="fail-dot" data-node-id="2-13" data-clicked="false" cx="243.4" cy="450.0" r="4.0" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
-<text x="331.5" y="118.9" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק תשתיות</text>
-<circle class="fail-dot" data-node-id="3-0" data-clicked="false" cx="331.5" cy="125.0" r="3.1" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
-<text x="334.5" y="143.2" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק חקלאות</text>
-<circle class="fail-dot" data-node-id="3-1" data-clicked="false" cx="334.5" cy="150.0" r="3.8" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
-<text x="328.6" y="167.2" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק גידולים</text>
-<circle class="fail-dot" data-node-id="3-2" data-clicked="false" cx="328.6" cy="175.0" r="4.8" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
-<text x="328.0" y="192.8" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק ב"ח</text>
-<circle class="fail-dot" data-node-id="3-3" data-clicked="false" cx="328.0" cy="200.0" r="4.2" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
-<text x="330.9" y="217.8" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק בריאות</text>
-<circle class="fail-dot" data-node-id="3-4" data-clicked="false" cx="330.9" cy="225.0" r="4.2" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
-<text x="330.2" y="242.7" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">עומס רפואי</text>
-<circle class="fail-dot" data-node-id="3-5" data-clicked="false" cx="330.2" cy="250.0" r="4.3" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
-<text x="326.2" y="268.4" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">פגיעת נשימה</text>
-<circle class="fail-dot" data-node-id="3-6" data-clicked="false" cx="326.2" cy="275.0" r="3.6" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
-<text x="330.7" y="293.7" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק רכוש</text>
-<circle class="fail-dot" data-node-id="3-7" data-clicked="false" cx="330.7" cy="300.0" r="3.3" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
-<text x="328.6" y="317.9" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק חופים</text>
-<circle class="fail-dot" data-node-id="3-8" data-clicked="false" cx="328.6" cy="325.0" r="4.1" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
-<text x="327.2" y="343.0" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק לים</text>
-<circle class="fail-dot" data-node-id="3-9" data-clicked="false" cx="327.2" cy="350.0" r="4.0" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
-<text x="330.7" y="368.6" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק תיירות</text>
-<circle class="fail-dot" data-node-id="3-10" data-clicked="false" cx="330.7" cy="375.0" r="3.4" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
-<text x="329.3" y="393.3" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">נזק מסחר</text>
-<circle class="fail-dot" data-node-id="3-11" data-clicked="false" cx="329.3" cy="400.0" r="3.7" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
-<text x="331.9" y="418.7" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">אובדן חיים</text>
-<circle class="fail-dot" data-node-id="3-12" data-clicked="false" cx="331.9" cy="425.0" r="3.3" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
-<text x="334.3" y="442.8" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="6.5" pointer-events="none">עקירת תושבים</text>
-<circle class="fail-dot" data-node-id="3-13" data-clicked="false" cx="334.3" cy="450.0" r="4.2" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
-<text x="412.3" y="117.9" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">מ' הבריאות</text>
-<circle class="fail-dot" data-node-id="4-0" data-clicked="false" cx="412.3" cy="125.0" r="4.1" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
-<text x="414.6" y="143.5" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">מ' החקלאות</text>
-<circle class="fail-dot" data-node-id="4-1" data-clicked="false" cx="414.6" cy="150.0" r="3.5" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
-<text x="413.7" y="167.9" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">מ' הביטחון</text>
-<circle class="fail-dot" data-node-id="4-2" data-clicked="false" cx="413.7" cy="175.0" r="4.1" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
-<text x="417.3" y="193.4" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">מ' הפנים</text>
-<circle class="fail-dot" data-node-id="4-3" data-clicked="false" cx="417.3" cy="200.0" r="3.6" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
-<text x="415.3" y="217.7" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">מ' התחבורה</text>
-<circle class="fail-dot" data-node-id="4-4" data-clicked="false" cx="415.3" cy="225.0" r="4.3" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
-<text x="415.5" y="242.4" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">מ' האנרגיה</text>
-<circle class="fail-dot" data-node-id="4-5" data-clicked="false" cx="415.5" cy="250.0" r="4.6" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
-<text x="418.8" y="267.3" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">מ' הסביבה</text>
-<circle class="fail-dot" data-node-id="4-6" data-clicked="false" cx="418.8" cy="275.0" r="4.7" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
-<text x="412.1" y="293.1" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">מ' האוצר</text>
-<circle class="fail-dot" data-node-id="4-7" data-clicked="false" cx="412.1" cy="300.0" r="3.9" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
-<text x="411.4" y="318.7" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">עיריות</text>
-<circle class="fail-dot" data-node-id="4-8" data-clicked="false" cx="411.4" cy="325.0" r="3.3" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
-<text x="415.5" y="342.9" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">מועצות איז'</text>
-<circle class="fail-dot" data-node-id="4-9" data-clicked="false" cx="415.5" cy="350.0" r="4.1" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
-<text x="417.7" y="367.6" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">חקלאים</text>
-<circle class="fail-dot" data-node-id="4-10" data-clicked="false" cx="417.7" cy="375.0" r="4.4" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
-<text x="412.0" y="393.7" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">דייגים</text>
-<circle class="fail-dot" data-node-id="4-11" data-clicked="false" cx="412.0" cy="400.0" r="3.3" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
-<text x="410.7" y="418.2" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">תעשייה</text>
-<circle class="fail-dot" data-node-id="4-12" data-clicked="false" cx="410.7" cy="425.0" r="3.8" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
-<text x="419.4" y="444.0" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="6.5" pointer-events="none">היי-טק</text>
-<circle class="fail-dot" data-node-id="4-13" data-clicked="false" cx="419.4" cy="450.0" r="3.0" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
-<text x="495.3" y="118.3" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">תיירות</text>
-<circle class="fail-dot" data-node-id="5-0" data-clicked="false" cx="495.3" cy="125.0" r="3.7" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
-<text x="503.6" y="140.0" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">תושבים</text>
-<circle class="fail-dot" data-node-id="5-1" data-clicked="false" cx="503.6" cy="146.7" r="3.7" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
-<text x="504.4" y="161.9" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">קשישים</text>
-<circle class="fail-dot" data-node-id="5-2" data-clicked="false" cx="504.4" cy="168.3" r="3.4" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
-<text x="504.9" y="182.7" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">ילדים</text>
-<circle class="fail-dot" data-node-id="5-3" data-clicked="false" cx="504.9" cy="190.0" r="4.3" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
-<text x="503.5" y="204.0" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">חולים</text>
-<circle class="fail-dot" data-node-id="5-4" data-clicked="false" cx="503.5" cy="211.7" r="4.7" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
-<text x="500.0" y="226.3" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">עסקים</text>
-<circle class="fail-dot" data-node-id="5-5" data-clicked="false" cx="500.0" cy="233.3" r="4.0" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
-<text x="499.9" y="248.2" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">חב' ביטוח</text>
-<circle class="fail-dot" data-node-id="5-6" data-clicked="false" cx="499.9" cy="255.0" r="3.8" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
-<text x="495.7" y="269.0" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">בנקים</text>
-<circle class="fail-dot" data-node-id="5-7" data-clicked="false" cx="495.7" cy="276.7" r="4.7" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
-<text x="499.5" y="291.2" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">מד"א</text>
-<circle class="fail-dot" data-node-id="5-8" data-clicked="false" cx="499.5" cy="298.3" r="4.1" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
-<text x="504.8" y="312.3" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">כיבוי אש</text>
-<circle class="fail-dot" data-node-id="5-9" data-clicked="false" cx="504.8" cy="320.0" r="4.7" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
-<text x="501.4" y="335.1" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">משטרה</text>
-<circle class="fail-dot" data-node-id="5-10" data-clicked="false" cx="501.4" cy="341.7" r="3.5" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
-<text x="501.5" y="356.5" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">צה"ל</text>
-<circle class="fail-dot" data-node-id="5-11" data-clicked="false" cx="501.5" cy="363.3" r="3.9" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
-<text x="502.3" y="378.7" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">חב' חשמל</text>
-<circle class="fail-dot" data-node-id="5-12" data-clicked="false" cx="502.3" cy="385.0" r="3.3" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
-<text x="498.5" y="400.4" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">חב' מים</text>
-<circle class="fail-dot" data-node-id="5-13" data-clicked="false" cx="498.5" cy="406.7" r="3.3" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
-<text x="496.5" y="422.3" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">אקדמיה</text>
-<circle class="fail-dot" data-node-id="5-14" data-clicked="false" cx="496.5" cy="428.3" r="3.1" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
-<text x="501.0" y="443.3" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="6.5" pointer-events="none">IPCC</text>
-<circle class="fail-dot" data-node-id="5-15" data-clicked="false" cx="501.0" cy="450.0" r="3.7" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
+<line x1="145" y1="115" x2="145" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+<line x1="222" y1="115" x2="222" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+<line x1="299" y1="115" x2="299" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+<line x1="376" y1="115" x2="376" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+<line x1="453" y1="115" x2="453" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.25"/>
+<line x1="530" y1="115" x2="530" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
 
-        <text x="160" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="11" font-weight="600">מודעות</text>
-        <text x="245" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="11" font-weight="600">תכנון</text>
-        <text x="330" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="11" font-weight="600">ניטור</text>
-        <text x="415" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="11" font-weight="600">רגולציה</text>
-        <text x="500" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">ניתוח דאטה</text>
-        
-        <rect x="10" y="250" width="90" height="80" rx="4" fill="#FFFFFF" stroke="#D4A017" stroke-width="3"/>
-        <rect x="10" y="250" width="6" height="80" rx="2" fill="#D4A017"/>
-        <text x="55" y="280" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="13" font-weight="700">אדפטציה</text>
-        <text x="55" y="297" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="10" font-weight="700">לשינויי אקלים</text>
-        <text x="55" y="318" text-anchor="middle" fill="#B8860B" font-family="Arial" font-size="9" font-style="italic">(Adaptation)</text>
-        
-        <rect id="damage-box" x="545" y="220" width="160" height="140" rx="4" fill="#FFFFFF" stroke="#B8442E" stroke-width="2.5"/>
-        <rect id="damage-accent" x="699" y="220" width="6" height="140" rx="2" fill="#B8442E"/>
-        <text id="damage-title" x="621" y="248" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="13" font-weight="700">סך הנזק</text>
-        <text x="621" y="266" text-anchor="middle" fill="#888" font-family="Arial" font-size="9">השנתי המשוער</text>
-        <text id="damage-number" x="621" y="303" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="22" font-weight="700">50</text>
-        <text id="damage-unit" x="621" y="325" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="13" font-weight="600">מיליארד ₪</text>
-        <text id="damage-level" x="621" y="343" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="10" font-weight="600">מינימלי</text>
-        <text x="621" y="355" text-anchor="middle" fill="#888" font-family="Arial" font-size="7" font-style="italic">(הערכה גסה בלבד)</text>
+<text x="148.1" y="119.4" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">ריבוי גשמים</text>
+<circle class="fail-dot" data-node-id="1-0" data-clicked="false" cx="148.1" cy="125.0" r="3.1" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="144.8" y="144.7" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">שריפות יער</text>
+<circle class="fail-dot" data-node-id="1-1" data-clicked="false" cx="144.8" cy="150.0" r="2.8" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="145.8" y="169.1" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">שריפות עיר</text>
+<circle class="fail-dot" data-node-id="1-2" data-clicked="false" cx="145.8" cy="175.0" r="3.4" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="147.2" y="193.9" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">גלי חום</text>
+<circle class="fail-dot" data-node-id="1-3" data-clicked="false" cx="147.2" cy="200.0" r="3.6" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="143.8" y="218.6" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">בצורת</text>
+<circle class="fail-dot" data-node-id="1-4" data-clicked="false" cx="143.8" cy="225.0" r="3.9" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="141.5" y="244.6" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">סופות חול</text>
+<circle class="fail-dot" data-node-id="1-5" data-clicked="false" cx="141.5" cy="250.0" r="2.9" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="148.0" y="268.4" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">סופות רעם</text>
+<circle class="fail-dot" data-node-id="1-6" data-clicked="false" cx="148.0" cy="275.0" r="4.1" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="143.2" y="294.1" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">ברד</text>
+<circle class="fail-dot" data-node-id="1-7" data-clicked="false" cx="143.2" cy="300.0" r="3.4" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="141.7" y="318.6" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">שטפונות</text>
+<circle class="fail-dot" data-node-id="1-8" data-clicked="false" cx="141.7" cy="325.0" r="3.9" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="144.9" y="343.4" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">הצפות פתע</text>
+<circle class="fail-dot" data-node-id="1-9" data-clicked="false" cx="144.9" cy="350.0" r="4.1" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="146.0" y="368.7" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">עליית ים</text>
+<circle class="fail-dot" data-node-id="1-10" data-clicked="false" cx="146.0" cy="375.0" r="3.8" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="147.4" y="393.5" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">סחף קרקע</text>
+<circle class="fail-dot" data-node-id="1-11" data-clicked="false" cx="147.4" cy="400.0" r="4.0" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="141.9" y="418.5" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">מדבור</text>
+<circle class="fail-dot" data-node-id="1-12" data-clicked="false" cx="141.9" cy="425.0" r="4.0" fill="#3D9970" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="148.3" y="444.4" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">התייבשות</text>
+<circle class="fail-dot" data-node-id="1-13" data-clicked="false" cx="148.3" cy="450.0" r="3.1" fill="#5CB88A" stroke="#2D7A5A" stroke-width="0.8"/>
+<text x="223.9" y="119.0" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">אובך כבד</text>
+<circle class="fail-dot" data-node-id="2-0" data-clicked="false" cx="223.9" cy="125.0" r="3.5" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
+<text x="222.3" y="144.2" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">שינוי עונות</text>
+<circle class="fail-dot" data-node-id="2-1" data-clicked="false" cx="222.3" cy="150.0" r="3.3" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
+<text x="223.4" y="169.4" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">מחסור מים</text>
+<circle class="fail-dot" data-node-id="2-2" data-clicked="false" cx="223.4" cy="175.0" r="3.1" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
+<text x="222.3" y="194.0" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">חום ממושך</text>
+<circle class="fail-dot" data-node-id="2-3" data-clicked="false" cx="222.3" cy="200.0" r="3.5" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
+<text x="223.8" y="219.1" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">יובש ממשך</text>
+<circle class="fail-dot" data-node-id="2-4" data-clicked="false" cx="223.8" cy="225.0" r="3.4" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
+<text x="221.8" y="243.8" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">שינוי משקעים</text>
+<circle class="fail-dot" data-node-id="2-5" data-clicked="false" cx="221.8" cy="250.0" r="3.7" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
+<text x="220.8" y="268.5" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">ברד חורפי</text>
+<circle class="fail-dot" data-node-id="2-6" data-clicked="false" cx="220.8" cy="275.0" r="4.0" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
+<text x="219.2" y="294.3" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">סופת חריגה</text>
+<circle class="fail-dot" data-node-id="2-7" data-clicked="false" cx="219.2" cy="300.0" r="3.2" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
+<text x="220.0" y="318.9" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">גשם חומצי</text>
+<circle class="fail-dot" data-node-id="2-8" data-clicked="false" cx="220.0" cy="325.0" r="3.6" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
+<text x="224.4" y="344.3" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">מזג קיצוני</text>
+<circle class="fail-dot" data-node-id="2-9" data-clicked="false" cx="224.4" cy="350.0" r="3.2" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
+<text x="222.7" y="369.7" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">אקלים מופרע</text>
+<circle class="fail-dot" data-node-id="2-10" data-clicked="false" cx="222.7" cy="375.0" r="2.8" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
+<text x="221.9" y="394.0" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">התחממות</text>
+<circle class="fail-dot" data-node-id="2-11" data-clicked="false" cx="221.9" cy="400.0" r="3.5" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
+<text x="220.9" y="418.6" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">טמפ' חריגה</text>
+<circle class="fail-dot" data-node-id="2-12" data-clicked="false" cx="220.9" cy="425.0" r="3.9" fill="#5CB88A" stroke="#3D9970" stroke-width="0.8"/>
+<text x="220.9" y="444.0" text-anchor="middle" fill="#2D7A5A" font-family="Arial" font-size="5.8" pointer-events="none">העלמת עונות</text>
+<circle class="fail-dot" data-node-id="2-13" data-clicked="false" cx="220.9" cy="450.0" r="3.5" fill="#7ACC9D" stroke="#3D9970" stroke-width="0.8"/>
+<text x="300.0" y="119.6" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק תשתיות</text>
+<circle class="fail-dot" data-node-id="3-0" data-clicked="false" cx="300.0" cy="125.0" r="2.9" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
+<text x="302.1" y="144.1" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק חקלאות</text>
+<circle class="fail-dot" data-node-id="3-1" data-clicked="false" cx="302.1" cy="150.0" r="3.4" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
+<text x="298.0" y="168.4" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק גידולים</text>
+<circle class="fail-dot" data-node-id="3-2" data-clicked="false" cx="298.0" cy="175.0" r="4.1" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
+<text x="297.6" y="193.9" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק ב"ח</text>
+<circle class="fail-dot" data-node-id="3-3" data-clicked="false" cx="297.6" cy="200.0" r="3.6" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
+<text x="299.6" y="218.9" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק בריאות</text>
+<circle class="fail-dot" data-node-id="3-4" data-clicked="false" cx="299.6" cy="225.0" r="3.6" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
+<text x="299.2" y="243.8" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">עומס רפואי</text>
+<circle class="fail-dot" data-node-id="3-5" data-clicked="false" cx="299.2" cy="250.0" r="3.7" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
+<text x="296.3" y="269.2" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">פגיעת נשימה</text>
+<circle class="fail-dot" data-node-id="3-6" data-clicked="false" cx="296.3" cy="275.0" r="3.3" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
+<text x="299.5" y="294.5" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק רכוש</text>
+<circle class="fail-dot" data-node-id="3-7" data-clicked="false" cx="299.5" cy="300.0" r="3.0" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
+<text x="298.0" y="318.9" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק חופים</text>
+<circle class="fail-dot" data-node-id="3-8" data-clicked="false" cx="298.0" cy="325.0" r="3.6" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
+<text x="297.0" y="343.9" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק לים</text>
+<circle class="fail-dot" data-node-id="3-9" data-clicked="false" cx="297.0" cy="350.0" r="3.6" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
+<text x="299.5" y="369.4" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק תיירות</text>
+<circle class="fail-dot" data-node-id="3-10" data-clicked="false" cx="299.5" cy="375.0" r="3.1" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
+<text x="298.5" y="394.2" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">נזק מסחר</text>
+<circle class="fail-dot" data-node-id="3-11" data-clicked="false" cx="298.5" cy="400.0" r="3.3" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
+<text x="300.4" y="419.5" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">אובדן חיים</text>
+<circle class="fail-dot" data-node-id="3-12" data-clicked="false" cx="300.4" cy="425.0" r="3.0" fill="#D4A017" stroke="#B8860B" stroke-width="0.8"/>
+<text x="302.0" y="443.8" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="5.8" pointer-events="none">עקירת תושבים</text>
+<circle class="fail-dot" data-node-id="3-13" data-clicked="false" cx="302.0" cy="450.0" r="3.7" fill="#E8B923" stroke="#B8860B" stroke-width="0.8"/>
+<text x="374.1" y="118.9" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">תקני בנייה</text>
+<circle class="fail-dot" data-node-id="4-0" data-clicked="false" cx="374.1" cy="125.0" r="3.6" fill="#D89050" stroke="#B8722E" stroke-width="0.8"/>
+<text x="375.7" y="144.3" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">תקנות חירום</text>
+<circle class="fail-dot" data-node-id="4-1" data-clicked="false" cx="375.7" cy="150.0" r="3.2" fill="#F0B070" stroke="#B8722E" stroke-width="0.8"/>
+<text x="375.1" y="168.9" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">חובות דיווח</text>
+<circle class="fail-dot" data-node-id="4-2" data-clicked="false" cx="375.1" cy="175.0" r="3.6" fill="#D89050" stroke="#B8722E" stroke-width="0.8"/>
+<text x="377.6" y="194.2" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">ביטוח חובה</text>
+<circle class="fail-dot" data-node-id="4-3" data-clicked="false" cx="377.6" cy="200.0" r="3.3" fill="#F0B070" stroke="#B8722E" stroke-width="0.8"/>
+<text x="376.2" y="218.8" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">אכיפת ציות</text>
+<circle class="fail-dot" data-node-id="4-4" data-clicked="false" cx="376.2" cy="225.0" r="3.7" fill="#D89050" stroke="#B8722E" stroke-width="0.8"/>
+<text x="376.4" y="243.5" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">היתרי פעולה</text>
+<circle class="fail-dot" data-node-id="4-5" data-clicked="false" cx="376.4" cy="250.0" r="4.0" fill="#F0B070" stroke="#B8722E" stroke-width="0.8"/>
+<text x="378.6" y="268.5" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">תקנות חקלאיות</text>
+<circle class="fail-dot" data-node-id="4-6" data-clicked="false" cx="378.6" cy="275.0" r="4.0" fill="#D89050" stroke="#B8722E" stroke-width="0.8"/>
+<text x="374.0" y="294.1" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">תקני בטיחות</text>
+<circle class="fail-dot" data-node-id="4-7" data-clicked="false" cx="374.0" cy="300.0" r="3.4" fill="#F0B070" stroke="#B8722E" stroke-width="0.8"/>
+<text x="373.5" y="319.5" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">הנחיות פיצוי</text>
+<circle class="fail-dot" data-node-id="4-8" data-clicked="false" cx="373.5" cy="325.0" r="3.0" fill="#D89050" stroke="#B8722E" stroke-width="0.8"/>
+<text x="376.4" y="343.9" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">עונשי עבירה</text>
+<circle class="fail-dot" data-node-id="4-9" data-clicked="false" cx="376.4" cy="350.0" r="3.6" fill="#F0B070" stroke="#B8722E" stroke-width="0.8"/>
+<text x="377.9" y="368.7" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">תקנות אקלים</text>
+<circle class="fail-dot" data-node-id="4-10" data-clicked="false" cx="377.9" cy="375.0" r="3.8" fill="#D89050" stroke="#B8722E" stroke-width="0.8"/>
+<text x="373.9" y="394.5" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">רגולציה מקומית</text>
+<circle class="fail-dot" data-node-id="4-11" data-clicked="false" cx="373.9" cy="400.0" r="3.0" fill="#F0B070" stroke="#B8722E" stroke-width="0.8"/>
+<text x="373.0" y="419.1" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">ראייה בינ"ל</text>
+<circle class="fail-dot" data-node-id="4-12" data-clicked="false" cx="373.0" cy="425.0" r="3.4" fill="#D89050" stroke="#B8722E" stroke-width="0.8"/>
+<text x="379.0" y="444.7" text-anchor="middle" fill="#7A4518" font-family="Arial" font-size="5.8" pointer-events="none">פרוטוקולים</text>
+<circle class="fail-dot" data-node-id="4-13" data-clicked="false" cx="379.0" cy="450.0" r="2.8" fill="#F0B070" stroke="#B8722E" stroke-width="0.8"/>
+<text x="449.7" y="119.2" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מ' הבריאות</text>
+<circle class="fail-dot" data-node-id="5-0" data-clicked="false" cx="449.7" cy="125.0" r="3.3" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="455.5" y="136.3" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מ' החקלאות</text>
+<circle class="fail-dot" data-node-id="5-1" data-clicked="false" cx="455.5" cy="142.1" r="3.3" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="456.1" y="153.6" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מ' הביטחון</text>
+<circle class="fail-dot" data-node-id="5-2" data-clicked="false" cx="456.1" cy="159.2" r="3.1" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="456.4" y="170.1" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מ' הפנים</text>
+<circle class="fail-dot" data-node-id="5-3" data-clicked="false" cx="456.4" cy="176.3" r="3.7" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="455.4" y="186.9" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מ' התחבורה</text>
+<circle class="fail-dot" data-node-id="5-4" data-clicked="false" cx="455.4" cy="193.4" r="4.0" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="453.0" y="204.5" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מ' האנרגיה</text>
+<circle class="fail-dot" data-node-id="5-5" data-clicked="false" cx="453.0" cy="210.5" r="3.5" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="452.9" y="221.8" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מ' הסביבה</text>
+<circle class="fail-dot" data-node-id="5-6" data-clicked="false" cx="452.9" cy="227.6" r="3.4" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="450.0" y="238.2" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מ' האוצר</text>
+<circle class="fail-dot" data-node-id="5-7" data-clicked="false" cx="450.0" cy="244.7" r="4.0" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="452.6" y="255.7" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">עיריות</text>
+<circle class="fail-dot" data-node-id="5-8" data-clicked="false" cx="452.6" cy="261.8" r="3.6" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="456.4" y="272.4" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מועצות איז'</text>
+<circle class="fail-dot" data-node-id="5-9" data-clicked="false" cx="456.4" cy="278.9" r="4.0" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="454.0" y="290.4" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">חקלאים</text>
+<circle class="fail-dot" data-node-id="5-10" data-clicked="false" cx="454.0" cy="296.1" r="3.2" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="454.1" y="307.2" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">דייגים</text>
+<circle class="fail-dot" data-node-id="5-11" data-clicked="false" cx="454.1" cy="313.2" r="3.4" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="454.6" y="324.8" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">תעשייה</text>
+<circle class="fail-dot" data-node-id="5-12" data-clicked="false" cx="454.6" cy="330.3" r="3.0" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="451.9" y="341.9" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">היי-טק</text>
+<circle class="fail-dot" data-node-id="5-13" data-clicked="false" cx="451.9" cy="347.4" r="3.0" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="450.6" y="359.1" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">חב' ביטוח</text>
+<circle class="fail-dot" data-node-id="5-14" data-clicked="false" cx="450.6" cy="364.5" r="2.8" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="453.7" y="375.8" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">בנקים</text>
+<circle class="fail-dot" data-node-id="5-15" data-clicked="false" cx="453.7" cy="381.6" r="3.3" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="453.5" y="392.8" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">מד"א</text>
+<circle class="fail-dot" data-node-id="5-16" data-clicked="false" cx="453.5" cy="398.7" r="3.4" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="451.2" y="409.3" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">כיבוי אש</text>
+<circle class="fail-dot" data-node-id="5-17" data-clicked="false" cx="451.2" cy="415.8" r="4.0" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="452.1" y="427.3" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">משטרה</text>
+<circle class="fail-dot" data-node-id="5-18" data-clicked="false" cx="452.1" cy="432.9" r="3.1" fill="#E87D4E" stroke="#D4663B" stroke-width="0.8"/>
+<text x="450.8" y="443.6" text-anchor="middle" fill="#8B3A1F" font-family="Arial" font-size="5.8" pointer-events="none">צה"ל</text>
+<circle class="fail-dot" data-node-id="5-19" data-clicked="false" cx="450.8" cy="450.0" r="3.9" fill="#F09565" stroke="#D4663B" stroke-width="0.8"/>
+<text x="529.3" y="119.6" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">מודלי חיזוי</text>
+<circle class="fail-dot" data-node-id="6-0" data-clicked="false" cx="529.3" cy="125.0" r="2.9" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
+<text x="531.4" y="143.8" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">ניתוח מגמות</text>
+<circle class="fail-dot" data-node-id="6-1" data-clicked="false" cx="531.4" cy="150.0" r="3.7" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
+<text x="531.8" y="169.4" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">למידת מכונה</text>
+<circle class="fail-dot" data-node-id="6-2" data-clicked="false" cx="531.8" cy="175.0" r="3.1" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
+<text x="528.3" y="193.7" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">דשבורדים</text>
+<circle class="fail-dot" data-node-id="6-3" data-clicked="false" cx="528.3" cy="200.0" r="3.8" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
+<text x="529.8" y="218.5" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">אינטגרציית מקורות</text>
+<circle class="fail-dot" data-node-id="6-4" data-clicked="false" cx="529.8" cy="225.0" r="4.0" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
+<text x="527.0" y="243.8" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">הערכת סיכון</text>
+<circle class="fail-dot" data-node-id="6-5" data-clicked="false" cx="527.0" cy="250.0" r="3.7" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
+<text x="533.5" y="268.5" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">תרחישי ייחוס</text>
+<circle class="fail-dot" data-node-id="6-6" data-clicked="false" cx="533.5" cy="275.0" r="4.0" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
+<text x="533.1" y="294.5" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">KPI לאומיים</text>
+<circle class="fail-dot" data-node-id="6-7" data-clicked="false" cx="533.1" cy="300.0" r="3.0" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
+<text x="527.4" y="318.5" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">חיזוי אירועים</text>
+<circle class="fail-dot" data-node-id="6-8" data-clicked="false" cx="527.4" cy="325.0" r="4.0" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
+<text x="526.6" y="344.0" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">הערכת נזק</text>
+<circle class="fail-dot" data-node-id="6-9" data-clicked="false" cx="526.6" cy="350.0" r="3.5" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
+<text x="532.1" y="368.8" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">השוואה עולמית</text>
+<circle class="fail-dot" data-node-id="6-10" data-clicked="false" cx="532.1" cy="375.0" r="3.7" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
+<text x="529.2" y="393.6" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">מאגרי דאטה</text>
+<circle class="fail-dot" data-node-id="6-11" data-clicked="false" cx="529.2" cy="400.0" r="3.9" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
+<text x="532.6" y="418.8" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">תמיכה בהחלטות</text>
+<circle class="fail-dot" data-node-id="6-12" data-clicked="false" cx="532.6" cy="425.0" r="3.7" fill="#D4533B" stroke="#B8442E" stroke-width="0.8"/>
+<text x="530.1" y="443.6" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="5.8" pointer-events="none">דוחות תקופתיים</text>
+<circle class="fail-dot" data-node-id="6-13" data-clicked="false" cx="530.1" cy="450.0" r="3.9" fill="#E86B52" stroke="#B8442E" stroke-width="0.8"/>
+
+<text x="145" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">מודעות</text>
+<text x="222" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">תכנון</text>
+<text x="299" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">ניטור</text>
+<text x="376" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">רגולציה</text>
+<text x="453" y="482" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="10" font-weight="700">בעלי עניין</text>
+<text x="530" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">ניתוח דאטה</text>
+
+<rect x="0" y="250" width="78" height="80" rx="4" fill="#FFFFFF" stroke="#D4A017" stroke-width="3"/>
+<rect x="0" y="250" width="6" height="80" rx="2" fill="#D4A017"/>
+<text x="39" y="280" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="11" font-weight="700">אדפטציה</text>
+<text x="39" y="297" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="9" font-weight="700">לשינויי אקלים</text>
+<text x="39" y="318" text-anchor="middle" fill="#B8860B" font-family="Arial" font-size="8" font-style="italic">(Adaptation)</text>
+
+<rect id="damage-box" x="575" y="220" width="155" height="140" rx="4" fill="#FFFFFF" stroke="#B8442E" stroke-width="2.5"/>
+<rect id="damage-accent" x="724" y="220" width="6" height="140" rx="2" fill="#B8442E"/>
+<text id="damage-title" x="649" y="248" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="13" font-weight="700">סך הנזק</text>
+<text x="649" y="266" text-anchor="middle" fill="#888" font-family="Arial" font-size="9">השנתי המשוער</text>
+<text id="damage-number" x="649" y="303" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="22" font-weight="700">50</text>
+<text id="damage-unit" x="649" y="325" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="13" font-weight="600">מיליארד ₪</text>
+<text id="damage-level" x="649" y="343" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="10" font-weight="600">מינימלי</text>
+<text x="649" y="355" text-anchor="middle" fill="#888" font-family="Arial" font-size="7" font-style="italic">(הערכה גסה בלבד)</text>
       </g>
       
       <text x="480" y="510" text-anchor="middle" fill="#888" font-family="Arial" font-size="9" font-style="italic">* המספרים להמחשה בלבד - לא נתמכים בניתוח מדעי/כלכלי מקיף, הרשימה חלקית והחלוקה לקטגוריות לא מוחלטת</text>
     </svg>
   </div>
   
+  <div class="svg-wrap" id="subchain-svg-wrap" style="display:none"></div>
+  
   <div class="controls">
     <button class="btn" onclick="nnReset()">אפס הכל</button>
     <button class="btn" onclick="nnAll()">כבה הכל</button>
-    <span class="counter">נואודים בכשל: <span class="counter-num" id="active-count">0</span> / 72</span>
+    <span class="counter">נואודים בכשל: <span class="counter-num" id="active-count">0</span> / 90</span>
   </div>
 </div>
 
 <div class="selection-tooltip" id="sel-tooltip">
   <span id="sel-name">—</span>
-  <button class="dash-btn" id="dash-btn">📊 דשבורד</button>
-</div>
-
-<div class="dashboard-backdrop" id="dash-backdrop" onclick="closeDashboard()"></div>
-
-<div class="dashboard-panel" id="dash-panel">
-  <div class="dashboard-header">
-    <button class="close-btn" onclick="closeDashboard()">×</button>
-    <h2 id="dash-title">—</h2>
-    <span class="cat-tag" id="dash-cat">—</span>
-    <div class="breadcrumb" id="dash-breadcrumb"></div>
-  </div>
-  <div class="dashboard-body" id="dash-body"></div>
+  <button class="dive-btn" id="dive-btn">↓ צלול לתת-שרשרת</button>
 </div>
 
 <script>
 (function() {
   const dots = Array.from(document.querySelectorAll('circle.fail-dot'));
-  const columns = { 1:[], 2:[], 3:[], 4:[], 5:[] };
+  const columns = { 1:[], 2:[], 3:[], 4:[], 5:[], 6:[] };
   dots.forEach(d => {
     const col = parseInt(d.dataset.nodeId.split('-')[0]);
     columns[col].push(d);
   });
   
-  const parents = {"2-0":["1-0","1-1"],"2-1":["1-1","1-0","1-2"],"2-2":["1-2","1-1","1-3"],"2-3":["1-3","1-2","1-4"],"2-4":["1-4","1-3","1-5"],"2-5":["1-5","1-4","1-6"],"2-6":["1-6","1-5","1-7"],"2-7":["1-7","1-6","1-8"],"2-8":["1-8","1-7","1-9"],"2-9":["1-9","1-8","1-10"],"2-10":["1-10","1-9","1-11"],"2-11":["1-11","1-10","1-12"],"2-12":["1-12","1-11","1-13"],"2-13":["1-13","1-12"],"3-0":["2-0","2-1"],"3-1":["2-1","2-0","2-2"],"3-2":["2-2","2-1","2-3"],"3-3":["2-3","2-2","2-4"],"3-4":["2-4","2-3","2-5"],"3-5":["2-5","2-4","2-6"],"3-6":["2-6","2-5","2-7"],"3-7":["2-7","2-6","2-8"],"3-8":["2-8","2-7","2-9"],"3-9":["2-9","2-8","2-10"],"3-10":["2-10","2-9","2-11"],"3-11":["2-11","2-10","2-12"],"3-12":["2-12","2-11","2-13"],"3-13":["2-13","2-12"],"4-0":["3-0","3-1"],"4-1":["3-1","3-0","3-2"],"4-2":["3-2","3-1","3-3"],"4-3":["3-3","3-2","3-4"],"4-4":["3-4","3-3","3-5"],"4-5":["3-5","3-4","3-6"],"4-6":["3-6","3-5","3-7"],"4-7":["3-7","3-6","3-8"],"4-8":["3-8","3-7","3-9"],"4-9":["3-9","3-8","3-10"],"4-10":["3-10","3-9","3-11"],"4-11":["3-11","3-10","3-12"],"4-12":["3-12","3-11","3-13"],"4-13":["3-13","3-12"],"5-0":["4-0","4-1"],"5-1":["4-1","4-0","4-2"],"5-2":["4-2","4-1","4-3"],"5-3":["4-3","4-2","4-4"],"5-4":["4-3","4-2","4-4"],"5-5":["4-4","4-3","4-5"],"5-6":["4-5","4-4","4-6"],"5-7":["4-6","4-5","4-7"],"5-8":["4-7","4-6","4-8"],"5-9":["4-8","4-7","4-9"],"5-10":["4-9","4-8","4-10"],"5-11":["4-10","4-9","4-11"],"5-12":["4-10","4-9","4-11"],"5-13":["4-11","4-10","4-12"],"5-14":["4-12","4-11","4-13"],"5-15":["4-13","4-12"]};
-  const weights = {"1-0":35,"1-1":47,"1-2":43,"1-3":38,"1-4":38,"1-5":45,"1-6":35,"1-7":43,"1-8":48,"1-9":47,"1-10":39,"1-11":42,"1-12":40,"1-13":39,"2-0":43,"2-1":46,"2-2":43,"2-3":40,"2-4":31,"2-5":43,"2-6":31,"2-7":32,"2-8":32,"2-9":42,"2-10":41,"2-11":45,"2-12":41,"2-13":36,"3-0":33,"3-1":41,"3-2":32,"3-3":36,"3-4":27,"3-5":31,"3-6":33,"3-7":36,"3-8":26,"3-9":33,"3-10":39,"3-11":40,"3-12":32,"3-13":34,"4-0":34,"4-1":33,"4-2":30,"4-3":32,"4-4":35,"4-5":23,"4-6":34,"4-7":25,"4-8":26,"4-9":38,"4-10":33,"4-11":31,"4-12":28,"4-13":25,"5-0":22,"5-1":28,"5-2":25,"5-3":23,"5-4":29,"5-5":24,"5-6":21,"5-7":21,"5-8":27,"5-9":31,"5-10":19,"5-11":24,"5-12":23,"5-13":29,"5-14":31,"5-15":22};
-  const totalMax = 2424;
+  const parents = {"2-0":["1-0","1-1"],"2-1":["1-1","1-0","1-2"],"2-2":["1-2","1-1","1-3"],"2-3":["1-3","1-2","1-4"],"2-4":["1-4","1-3","1-5"],"2-5":["1-5","1-4","1-6"],"2-6":["1-6","1-5","1-7"],"2-7":["1-7","1-6","1-8"],"2-8":["1-8","1-7","1-9"],"2-9":["1-9","1-8","1-10"],"2-10":["1-10","1-9","1-11"],"2-11":["1-11","1-10","1-12"],"2-12":["1-12","1-11","1-13"],"2-13":["1-13","1-12"],"3-0":["2-0","2-1"],"3-1":["2-1","2-0","2-2"],"3-2":["2-2","2-1","2-3"],"3-3":["2-3","2-2","2-4"],"3-4":["2-4","2-3","2-5"],"3-5":["2-5","2-4","2-6"],"3-6":["2-6","2-5","2-7"],"3-7":["2-7","2-6","2-8"],"3-8":["2-8","2-7","2-9"],"3-9":["2-9","2-8","2-10"],"3-10":["2-10","2-9","2-11"],"3-11":["2-11","2-10","2-12"],"3-12":["2-12","2-11","2-13"],"3-13":["2-13","2-12"],"4-0":["3-0","3-1"],"4-1":["3-1","3-0","3-2"],"4-2":["3-2","3-1","3-3"],"4-3":["3-3","3-2","3-4"],"4-4":["3-4","3-3","3-5"],"4-5":["3-5","3-4","3-6"],"4-6":["3-6","3-5","3-7"],"4-7":["3-7","3-6","3-8"],"4-8":["3-8","3-7","3-9"],"4-9":["3-9","3-8","3-10"],"4-10":["3-10","3-9","3-11"],"4-11":["3-11","3-10","3-12"],"4-12":["3-12","3-11","3-13"],"4-13":["3-13","3-12"],"5-0":["4-0","4-1"],"5-1":["4-1","4-0","4-2"],"5-2":["4-1","4-0","4-2"],"5-3":["4-2","4-1","4-3"],"5-4":["4-3","4-2","4-4"],"5-5":["4-3","4-2","4-4"],"5-6":["4-4","4-3","4-5"],"5-7":["4-5","4-4","4-6"],"5-8":["4-5","4-4","4-6"],"5-9":["4-6","4-5","4-7"],"5-10":["4-7","4-6","4-8"],"5-11":["4-8","4-7","4-9"],"5-12":["4-8","4-7","4-9"],"5-13":["4-9","4-8","4-10"],"5-14":["4-10","4-9","4-11"],"5-15":["4-10","4-9","4-11"],"5-16":["4-11","4-10","4-12"],"5-17":["4-12","4-11","4-13"],"5-18":["4-12","4-11","4-13"],"5-19":["4-13","4-12"],"6-0":["5-0","5-1"],"6-1":["5-1","5-0","5-2"],"6-2":["5-3","5-2","5-4"],"6-3":["5-4","5-3","5-5"],"6-4":["5-6","5-5","5-7"],"6-5":["5-7","5-6","5-8"],"6-6":["5-9","5-8","5-10"],"6-7":["5-10","5-9","5-11"],"6-8":["5-12","5-11","5-13"],"6-9":["5-13","5-12","5-14"],"6-10":["5-15","5-14","5-16"],"6-11":["5-16","5-15","5-17"],"6-12":["5-18","5-17","5-19"],"6-13":["5-19","5-18"]};
+  const weights = {"1-0":35,"1-1":47,"1-2":43,"1-3":38,"1-4":38,"1-5":45,"1-6":35,"1-7":43,"1-8":48,"1-9":47,"1-10":39,"1-11":42,"1-12":40,"1-13":39,"2-0":43,"2-1":46,"2-2":43,"2-3":40,"2-4":31,"2-5":43,"2-6":31,"2-7":32,"2-8":32,"2-9":42,"2-10":41,"2-11":45,"2-12":41,"2-13":36,"3-0":33,"3-1":41,"3-2":32,"3-3":36,"3-4":27,"3-5":31,"3-6":33,"3-7":36,"3-8":26,"3-9":33,"3-10":39,"3-11":40,"3-12":32,"3-13":34,"4-0":34,"4-1":33,"4-2":30,"4-3":32,"4-4":35,"4-5":23,"4-6":34,"4-7":25,"4-8":26,"4-9":38,"4-10":33,"4-11":31,"4-12":28,"4-13":25,"5-0":24,"5-1":30,"5-2":27,"5-3":25,"5-4":31,"5-5":26,"5-6":23,"5-7":23,"5-8":29,"5-9":33,"5-10":21,"5-11":26,"5-12":25,"5-13":31,"5-14":33,"5-15":24,"5-16":26,"5-17":27,"5-18":30,"5-19":34,"6-0":33,"6-1":19,"6-2":28,"6-3":21,"6-4":32,"6-5":28,"6-6":29,"6-7":27,"6-8":24,"6-9":18,"6-10":27,"6-11":31,"6-12":32,"6-13":21};
+  const totalMax = 2943;
   const baseDamage = 50;
+  const totalNodes = 80;
   
   const box = document.getElementById('damage-box');
   const accent = document.getElementById('damage-accent');
@@ -559,20 +699,14 @@ circle.fail-dot.off {
   const levelEl = document.getElementById('damage-level');
   const cnt = document.getElementById('active-count');
 
-  function formatNum(n) {
-    return n.toLocaleString('en-US');
-  }
+  function formatNum(n) { return n.toLocaleString('en-US'); }
 
   function update() {
     const offStatus = {};
-    
-    // Col 1: off only if user clicked
     columns[1].forEach(d => {
       offStatus[d.dataset.nodeId] = d.dataset.clicked === 'true';
     });
-    
-    // Cols 2-5: off if clicked OR any parent off
-    for (let col = 2; col <= 5; col++) {
+    for (let col = 2; col <= 6; col++) {
       columns[col].forEach(d => {
         const id = d.dataset.nodeId;
         const clicked = d.dataset.clicked === 'true';
@@ -580,10 +714,7 @@ circle.fail-dot.off {
         offStatus[id] = clicked || anyParentOff;
       });
     }
-    
-    let offCount = 0;
-    let offWeightSum = 0;
-    
+    let offCount = 0, offWeightSum = 0;
     dots.forEach(d => {
       const id = d.dataset.nodeId;
       const isOff = offStatus[id];
@@ -593,20 +724,15 @@ circle.fail-dot.off {
         offWeightSum += weights[id] || 0;
       }
     });
-    
     const totalDamage = baseDamage + offWeightSum;
     const pct = offWeightSum / totalMax;
-    
     cnt.textContent = offCount;
     numberEl.textContent = formatNum(totalDamage);
-    
-    // Color and level by damage %
     let color = '#3D9970', level = 'מינימלי';
     if (pct > 0.05) { color = '#7A9E5E'; level = 'נמוך'; }
     if (pct > 0.25) { color = '#D4A017'; level = 'בינוני'; }
     if (pct > 0.5)  { color = '#E87D4E'; level = 'גבוה'; }
     if (pct > 0.75) { color = '#D4533B'; level = 'קריטי'; }
-    
     box.setAttribute('stroke', color);
     accent.setAttribute('fill', color);
     title.setAttribute('fill', color);
@@ -614,14 +740,8 @@ circle.fail-dot.off {
     unitEl.setAttribute('fill', color);
     levelEl.setAttribute('fill', color);
     levelEl.textContent = level;
-    
-    // Shrink font size if number gets huge
-    if (totalDamage >= 1000) {
-      numberEl.setAttribute('font-size', '20');
-    } else {
-      numberEl.setAttribute('font-size', '22');
-    }
-    
+    if (totalDamage >= 1000) numberEl.setAttribute('font-size', '20');
+    else numberEl.setAttribute('font-size', '22');
     if (pct > 0.5) box.classList.add('high');
     else box.classList.remove('high');
   }
@@ -635,71 +755,22 @@ circle.fail-dot.off {
     });
   });
 
-  // ============ DASHBOARD FEATURE ============
-  
-  // Node metadata: name, category, column
-  const nodeMeta = (function() {
-    const zoneData = [
-      { col: 'מודעות', cat: 'event', items: ["ריבוי גשמים","שריפות יער","שריפות עיר","גלי חום","בצורת","סופות חול","סופות רעם","ברד","שטפונות","הצפות פתע","עליית ים","סחף קרקע","מדבור","התייבשות"] },
-      { col: 'תכנון', cat: 'event', items: ["אובך כבד","שינוי עונות","מחסור מים","חום ממושך","יובש ממשך","שינוי משקעים","ברד חורפי","סופת חריגה","גשם חומצי","מזג קיצוני","אקלים מופרע","התחממות","טמפ' חריגה","העלמת עונות"] },
-      { col: 'ניטור', cat: 'damage', items: ["נזק תשתיות","נזק חקלאות","נזק גידולים",'נזק ב"ח',"נזק בריאות","עומס רפואי","פגיעת נשימה","נזק רכוש","נזק חופים","נזק לים","נזק תיירות","נזק מסחר","אובדן חיים","עקירת תושבים"] },
-      { col: 'רגולציה', cat: 'stakeholder', items: ["מ' הבריאות","מ' החקלאות","מ' הביטחון","מ' הפנים","מ' התחבורה","מ' האנרגיה","מ' הסביבה","מ' האוצר","עיריות","מועצות איז'","חקלאים","דייגים","תעשייה","היי-טק"] },
-      { col: 'ניתוח דאטה', cat: 'stakeholder', items: ["תיירות","תושבים","קשישים","ילדים","חולים","עסקים","חב' ביטוח","בנקים",'מד"א',"כיבוי אש","משטרה",'צה"ל',"חב' חשמל","חב' מים","אקדמיה","IPCC"] }
-    ];
-    const meta = {};
-    zoneData.forEach((z, zIdx) => {
-      z.items.forEach((name, i) => {
-        meta[`${zIdx+1}-${i}`] = { name, cat: z.cat, col: z.col };
-      });
-    });
-    return meta;
-  })();
-
-  // Build children map (inverse of parents)
-  const children = {};
-  for (const nid in parents) {
-    parents[nid].forEach(p => {
-      if (!children[p]) children[p] = [];
-      children[p].push(nid);
-    });
-  }
-
-  // Get all transitive descendants by category
-  function getDescendantsByCategory(nodeId) {
-    const visited = new Set();
-    const stack = [nodeId];
-    const byCat = { event: [], damage: [], stakeholder: [] };
-    while (stack.length) {
-      const current = stack.pop();
-      (children[current] || []).forEach(child => {
-        if (!visited.has(child)) {
-          visited.add(child);
-          stack.push(child);
-          const m = nodeMeta[child];
-          if (m) byCat[m.cat].push(child);
-        }
-      });
-    }
-    return byCat;
-  }
-
-  // UI elements
+  // ============ SUB-CHAIN DRILL-DOWN ============
+  const nodeMeta = {"1-0":{"name":"ריבוי גשמים","cat":"event","col":"מודעות"},"1-1":{"name":"שריפות יער","cat":"event","col":"מודעות"},"1-2":{"name":"שריפות עיר","cat":"event","col":"מודעות"},"1-3":{"name":"גלי חום","cat":"event","col":"מודעות"},"1-4":{"name":"בצורת","cat":"event","col":"מודעות"},"1-5":{"name":"סופות חול","cat":"event","col":"מודעות"},"1-6":{"name":"סופות רעם","cat":"event","col":"מודעות"},"1-7":{"name":"ברד","cat":"event","col":"מודעות"},"1-8":{"name":"שטפונות","cat":"event","col":"מודעות"},"1-9":{"name":"הצפות פתע","cat":"event","col":"מודעות"},"1-10":{"name":"עליית ים","cat":"event","col":"מודעות"},"1-11":{"name":"סחף קרקע","cat":"event","col":"מודעות"},"1-12":{"name":"מדבור","cat":"event","col":"מודעות"},"1-13":{"name":"התייבשות","cat":"event","col":"מודעות"},"2-0":{"name":"אובך כבד","cat":"event","col":"תכנון"},"2-1":{"name":"שינוי עונות","cat":"event","col":"תכנון"},"2-2":{"name":"מחסור מים","cat":"event","col":"תכנון"},"2-3":{"name":"חום ממושך","cat":"event","col":"תכנון"},"2-4":{"name":"יובש ממשך","cat":"event","col":"תכנון"},"2-5":{"name":"שינוי משקעים","cat":"event","col":"תכנון"},"2-6":{"name":"ברד חורפי","cat":"event","col":"תכנון"},"2-7":{"name":"סופת חריגה","cat":"event","col":"תכנון"},"2-8":{"name":"גשם חומצי","cat":"event","col":"תכנון"},"2-9":{"name":"מזג קיצוני","cat":"event","col":"תכנון"},"2-10":{"name":"אקלים מופרע","cat":"event","col":"תכנון"},"2-11":{"name":"התחממות","cat":"event","col":"תכנון"},"2-12":{"name":"טמפ' חריגה","cat":"event","col":"תכנון"},"2-13":{"name":"העלמת עונות","cat":"event","col":"תכנון"},"3-0":{"name":"נזק תשתיות","cat":"damage","col":"ניטור"},"3-1":{"name":"נזק חקלאות","cat":"damage","col":"ניטור"},"3-2":{"name":"נזק גידולים","cat":"damage","col":"ניטור"},"3-3":{"name":"נזק ב\"ח","cat":"damage","col":"ניטור"},"3-4":{"name":"נזק בריאות","cat":"damage","col":"ניטור"},"3-5":{"name":"עומס רפואי","cat":"damage","col":"ניטור"},"3-6":{"name":"פגיעת נשימה","cat":"damage","col":"ניטור"},"3-7":{"name":"נזק רכוש","cat":"damage","col":"ניטור"},"3-8":{"name":"נזק חופים","cat":"damage","col":"ניטור"},"3-9":{"name":"נזק לים","cat":"damage","col":"ניטור"},"3-10":{"name":"נזק תיירות","cat":"damage","col":"ניטור"},"3-11":{"name":"נזק מסחר","cat":"damage","col":"ניטור"},"3-12":{"name":"אובדן חיים","cat":"damage","col":"ניטור"},"3-13":{"name":"עקירת תושבים","cat":"damage","col":"ניטור"},"4-0":{"name":"תקני בנייה","cat":"regulation","col":"רגולציה"},"4-1":{"name":"חובות דיווח","cat":"regulation","col":"רגולציה"},"4-2":{"name":"היתרי פעילות","cat":"regulation","col":"רגולציה"},"4-3":{"name":"תקנות חירום","cat":"regulation","col":"רגולציה"},"4-4":{"name":"אכיפת ציות","cat":"regulation","col":"רגולציה"},"4-5":{"name":"ביטוח חובה","cat":"regulation","col":"רגולציה"},"4-6":{"name":"מסגרת משפטית","cat":"regulation","col":"רגולציה"},"4-7":{"name":"הנחיות לאומיות","cat":"regulation","col":"רגולציה"},"4-8":{"name":"תקנות מקומיות","cat":"regulation","col":"רגולציה"},"4-9":{"name":"ועדות חקירה","cat":"regulation","col":"רגולציה"},"4-10":{"name":"סטנדרטים","cat":"regulation","col":"רגולציה"},"4-11":{"name":"תיאום בין-רגולטורי","cat":"regulation","col":"רגולציה"},"5-0":{"name":"משרדי ממשלה","cat":"stakeholder","col":"בעלי עניין"},"5-1":{"name":"עיריות","cat":"stakeholder","col":"בעלי עניין"},"5-2":{"name":"רשויות מקומיות","cat":"stakeholder","col":"בעלי עניין"},"5-3":{"name":"חקלאים","cat":"stakeholder","col":"בעלי עניין"},"5-4":{"name":"דייגים","cat":"stakeholder","col":"בעלי עניין"},"5-5":{"name":"תעשייה","cat":"stakeholder","col":"בעלי עניין"},"5-6":{"name":"חב' ביטוח","cat":"stakeholder","col":"בעלי עניין"},"5-7":{"name":"בנקים","cat":"stakeholder","col":"בעלי עניין"},"5-8":{"name":"תושבים","cat":"stakeholder","col":"בעלי עניין"},"5-9":{"name":"שירותי הצלה","cat":"stakeholder","col":"בעלי עניין"},"5-10":{"name":"צה\"ל","cat":"stakeholder","col":"בעלי עניין"},"5-11":{"name":"חב' תשתיות","cat":"stakeholder","col":"בעלי עניין"},"5-12":{"name":"אקדמיה","cat":"stakeholder","col":"בעלי עניין"},"5-13":{"name":"תקשורת","cat":"stakeholder","col":"בעלי עניין"},"6-0":{"name":"מודלי חיזוי","cat":"data","col":"ניתוח דאטה"},"6-1":{"name":"ניתוח מגמות","cat":"data","col":"ניתוח דאטה"},"6-2":{"name":"למידת מכונה","cat":"data","col":"ניתוח דאטה"},"6-3":{"name":"דשבורדי ניהול","cat":"data","col":"ניתוח דאטה"},"6-4":{"name":"תרחישים","cat":"data","col":"ניתוח דאטה"},"6-5":{"name":"הערכת נזק","cat":"data","col":"ניתוח דאטה"},"6-6":{"name":"תמיכה בהחלטות","cat":"data","col":"ניתוח דאטה"},"6-7":{"name":"KPI לאומיים","cat":"data","col":"ניתוח דאטה"},"6-8":{"name":"השוואה עולמית","cat":"data","col":"ניתוח דאטה"},"6-9":{"name":"דוחות תקופתיים","cat":"data","col":"ניתוח דאטה"},"6-10":{"name":"אינטגרציה","cat":"data","col":"ניתוח דאטה"},"6-11":{"name":"IPCC data","cat":"data","col":"ניתוח דאטה"}};
   const tooltip = document.getElementById('sel-tooltip');
   const tooltipName = document.getElementById('sel-name');
-  const dashBtn = document.getElementById('dash-btn');
-  const panel = document.getElementById('dash-panel');
-  const backdrop = document.getElementById('dash-backdrop');
-  const dashTitle = document.getElementById('dash-title');
-  const dashCat = document.getElementById('dash-cat');
-  const dashBody = document.getElementById('dash-body');
-  const dashBreadcrumb = document.getElementById('dash-breadcrumb');
+  const diveBtn = document.getElementById('dive-btn');
+  const mainWrap = document.getElementById('main-svg-wrap');
+  const subWrap = document.getElementById('subchain-svg-wrap');
+  const banner = document.getElementById('subchain-banner');
+  const crumbsEl = document.getElementById('subchain-crumbs');
 
-  let selectedId = null;
+  let selectedDotId = null;
   let navStack = [];
 
   function showSelectionTooltip(dotEl) {
     const id = dotEl.dataset.nodeId;
-    selectedId = id;
+    selectedDotId = id;
     const meta = nodeMeta[id];
     tooltipName.textContent = meta.name;
     const r = dotEl.getBoundingClientRect();
@@ -710,160 +781,478 @@ circle.fail-dot.off {
 
   function hideSelectionTooltip() {
     tooltip.classList.remove('show');
-    selectedId = null;
+    selectedDotId = null;
   }
 
-  // Click anywhere else closes tooltip
   document.addEventListener('click', (e) => {
-    if (!tooltip.contains(e.target) && !e.target.classList.contains('fail-dot')) {
+    if (!tooltip.contains(e.target) && !e.target.classList.contains('fail-dot') && !e.target.classList.contains('sub-dot')) {
       hideSelectionTooltip();
     }
   });
 
-  dashBtn.addEventListener('click', (e) => {
+  diveBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (selectedId) {
-      navStack = [selectedId];
-      renderDashboard(selectedId);
-      panel.classList.add('open');
-      backdrop.classList.add('open');
+    if (selectedDotId) {
+      // Find the clicked node and get its position for transform-origin
+      const dotEl = document.querySelector(`circle.fail-dot[data-node-id="${selectedDotId}"]`);
+      let originX = 50, originY = 50;
+      if (dotEl) {
+        const wrapRect = mainWrap.getBoundingClientRect();
+        const dotRect = dotEl.getBoundingClientRect();
+        originX = ((dotRect.left + dotRect.width/2) - wrapRect.left) / wrapRect.width * 100;
+        originY = ((dotRect.top + dotRect.height/2) - wrapRect.top) / wrapRect.height * 100;
+        mainWrap.style.transformOrigin = `${originX}% ${originY}%`;
+        
+        // Flash the clicked node
+        dotEl.classList.add('zoom-target');
+      }
+      
+      navStack = [selectedDotId];
       hideSelectionTooltip();
+      
+      // Zoom out the main view (expand toward selected node)
+      mainWrap.classList.add('zooming-out');
+      
+      // After zoom-out completes, show sub-chain with zoom-in
+      setTimeout(() => {
+        mainWrap.style.display = 'none';
+        mainWrap.classList.remove('zooming-out');
+        if (dotEl) dotEl.classList.remove('zoom-target');
+        
+        // Prepare sub-wrap for zoom-in FROM the same origin point
+        subWrap.style.display = 'block';
+        subWrap.style.transformOrigin = `${originX}% ${originY}%`;
+        banner.classList.add('show');
+        renderSubchain();
+        subWrap.classList.add('zooming-in-start');
+        
+        // Trigger the zoom-in animation
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            subWrap.classList.remove('zooming-in-start');
+            subWrap.classList.add('zooming-in-active');
+          });
+        });
+        
+        // Clean up
+        setTimeout(() => {
+          subWrap.classList.remove('zooming-in-active');
+          subWrap.style.transformOrigin = '';
+        }, 700);
+      }, 500);
     }
   });
 
-  window.closeDashboard = function() {
-    panel.classList.remove('open');
-    backdrop.classList.remove('open');
-    navStack = [];
+  window.closeSubchain = function() {
+    // Zoom out of sub-chain, zoom back into main
+    subWrap.classList.add('zooming-out');
+    banner.classList.remove('show');
+    
+    setTimeout(() => {
+      subWrap.style.display = 'none';
+      subWrap.classList.remove('zooming-out');
+      
+      mainWrap.style.display = 'block';
+      mainWrap.classList.add('zooming-in-start');
+      
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          mainWrap.classList.remove('zooming-in-start');
+          mainWrap.classList.add('zooming-in-active');
+        });
+      });
+      
+      setTimeout(() => {
+        mainWrap.classList.remove('zooming-in-active');
+        mainWrap.style.transformOrigin = '';
+      }, 700);
+      
+      navStack = [];
+    }, 500);
   };
 
-  window.navigateDash = function(nodeId) {
-    navStack.push(nodeId);
-    renderDashboard(nodeId);
-    panel.scrollTop = 0;
-  };
-
-  window.breadcrumbJump = function(idx) {
-    navStack = navStack.slice(0, idx + 1);
-    renderDashboard(navStack[navStack.length - 1]);
-    panel.scrollTop = 0;
-  };
-
-  function renderChips(nodeIds) {
-    if (!nodeIds.length) return '<div class="empty-state">אין תלויות ברמה זו</div>';
-    return '<div>' + nodeIds.map(id => {
-      const m = nodeMeta[id];
-      return `<span class="node-chip cat-${m.cat}" onclick="navigateDash('${id}')">${m.name}</span>`;
-    }).join('') + '</div>';
-  }
-
-  function renderBreadcrumb() {
-    dashBreadcrumb.innerHTML = navStack.map((id, i) => {
-      const m = nodeMeta[id];
-      const isLast = i === navStack.length - 1;
-      return isLast
-        ? `<span class="current">${m.name}</span>`
-        : `<span onclick="breadcrumbJump(${i})">${m.name}</span>`;
-    }).join(' ← ');
-  }
-
-  function mockBars(count) {
-    let html = '<div class="placeholder-chart">';
+  // ============ DASHBOARD (Third level) ============
+  const dashboardWrap = document.getElementById('dashboard-wrap');
+  const dashboardBanner = document.getElementById('dashboard-banner');
+  const dashboardCrumbs = document.getElementById('dashboard-crumbs');
+  
+  function mockBars(count, seed) {
+    let html = '<div class="chart-bars">';
     for (let i = 0; i < count; i++) {
-      const h = 20 + Math.random() * 75;
-      html += `<div class="bar" style="height:${h}%"></div>`;
+      const h = 25 + (Math.abs(Math.sin((seed + i) * 12.9898)) * 70);
+      html += `<div class="bar" style="height:${h.toFixed(0)}%"></div>`;
     }
     return html + '</div>';
   }
-
-  function renderDashboard(nodeId) {
-    const meta = nodeMeta[nodeId];
-    const desc = getDescendantsByCategory(nodeId);
+  
+  function renderDashboard(parentId) {
+    const meta = nodeMeta[parentId];
+    const labels = getSubchainLabels(parentId);
+    const seedNum = parentId.charCodeAt(0) + parentId.charCodeAt(2);
     
-    dashTitle.textContent = meta.name;
-    const catLabel = { event: 'אירוע אקלים', damage: 'סוג נזק', stakeholder: 'בעל עניין' }[meta.cat];
-    dashCat.textContent = `${catLabel} • ${meta.col}`;
+    // Gather all stakeholders from sub-chain column 5 (index 4)
+    const stakeholders = labels[4] || [];
     
-    renderBreadcrumb();
-
-    let html = '';
-
-    // Overview section
-    html += `
-      <div class="dash-section">
-        <h3>📊 סקירה</h3>
-        <div class="kpi-grid">
-          <div class="kpi-item">
-            <div class="kpi-label">חומרה</div>
-            <div class="kpi-value">גבוהה</div>
-            <div class="kpi-bar"><div class="kpi-bar-fill" style="width:78%"></div></div>
-          </div>
-          <div class="kpi-item">
-            <div class="kpi-label">תדירות</div>
-            <div class="kpi-value">${meta.cat === 'event' ? 'עונתית' : 'שוטפת'}</div>
-            <div class="kpi-bar"><div class="kpi-bar-fill" style="width:62%"></div></div>
-          </div>
-          <div class="kpi-item">
-            <div class="kpi-label">רמת בשלות ניטור</div>
-            <div class="kpi-value">בינונית</div>
-            <div class="kpi-bar"><div class="kpi-bar-fill" style="width:45%"></div></div>
-          </div>
-          <div class="kpi-item">
-            <div class="kpi-label">איכות דאטה</div>
-            <div class="kpi-value">חלקית</div>
-            <div class="kpi-bar"><div class="kpi-bar-fill" style="width:38%"></div></div>
+    // Mock damage number
+    const damageLabel = meta.cat === 'event' ? 'נזק ממוקד מאירוע' : 
+                        meta.cat === 'damage' ? 'היקף נזק מצטבר' : 
+                        meta.cat === 'stakeholder' ? 'היקף השפעה' : 'מדד מרכזי';
+    
+    const html = `
+      <div class="dashboard-title">📊 דשבורד ניהולי: ${meta.name}</div>
+      <div class="dashboard-subtitle">קטגוריה: ${meta.col} · תצוגה מפורטת של תת-שרשרת הערך · מוצר קצה של מערכת ניהול שרשראות</div>
+      
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <h3>🎯 KPI מרכזיים</h3>
+          <div class="kpi-row">
+            <div class="kpi-box">
+              <div class="label">חומרת נזק</div>
+              <div class="value">גבוהה</div>
+              <div class="bar"><div class="bar-fill" style="width:82%"></div></div>
+            </div>
+            <div class="kpi-box">
+              <div class="label">מוכנות מערכתית</div>
+              <div class="value">חלקית</div>
+              <div class="bar"><div class="bar-fill" style="width:54%"></div></div>
+            </div>
+            <div class="kpi-box">
+              <div class="label">איכות דאטה</div>
+              <div class="value">בינונית</div>
+              <div class="bar"><div class="bar-fill" style="width:47%"></div></div>
+            </div>
+            <div class="kpi-box">
+              <div class="label">תיאום שותפים</div>
+              <div class="value">נמוך</div>
+              <div class="bar"><div class="bar-fill" style="width:31%"></div></div>
+            </div>
           </div>
         </div>
-        <div class="mock-note">דוגמה להמחשה - יחובר למקורות דאטה אמיתיים</div>
-      </div>`;
-
-    // Downstream impact
-    if (meta.cat === 'event') {
-      html += `
-        <div class="dash-section">
-          <h3>⚠️ נזקים קשורים (${desc.damage.length})</h3>
-          ${renderChips(desc.damage)}
+        
+        <div class="dashboard-card">
+          <h3>⚠️ התראות פעילות</h3>
+          <div class="alert-row">
+            <span class="alert-pill red">🔴 3 כשלים קריטיים</span>
+            <span class="alert-pill amber">🟡 7 פערים במעקב</span>
+            <span class="alert-pill amber">🟡 12 נתונים חסרים</span>
+            <span class="alert-pill green">🟢 רגולציה מעודכנת</span>
+            <span class="alert-pill red">🔴 תקציב חסר</span>
+          </div>
+          <div class="mock-note">ניתן להגדיר סף התראה לכל מדד</div>
         </div>
-        <div class="dash-section">
-          <h3>👥 בעלי עניין מושפעים (${desc.stakeholder.length})</h3>
-          ${renderChips(desc.stakeholder)}
-        </div>`;
-    } else if (meta.cat === 'damage') {
-      html += `
-        <div class="dash-section">
-          <h3>👥 בעלי עניין מושפעים (${desc.stakeholder.length})</h3>
-          ${renderChips(desc.stakeholder)}
-        </div>`;
-    } else {
-      html += `
-        <div class="dash-section">
-          <h3>🔗 קשרים</h3>
-          <div class="empty-state">בעל עניין - צמצב הרשת (אין תלויות מטה)</div>
-        </div>`;
+        
+        <div class="dashboard-card">
+          <h3>💰 ${damageLabel}</h3>
+          <div style="text-align:center; padding:10px 0">
+            <div style="font-size:28px; font-weight:700; color:#A32D2D">מאות מיליוני ₪</div>
+            <div style="font-size:11px; color:#888; margin-top:4px">הערכה גסה · להמחשה בלבד</div>
+          </div>
+        </div>
+        
+        <div class="dashboard-card wide">
+          <h3>📈 מגמות 12 חודשים</h3>
+          ${mockBars(12, seedNum)}
+          <div class="mock-note">שילוב מקורות: ניטור סביבתי · דיווחי רשויות · חיישני IoT · דאטה ממשלתית</div>
+        </div>
+        
+        <div class="dashboard-card full">
+          <h3>👥 בעלי עניין מעורבים (${stakeholders.length})</h3>
+          <div class="stake-list">
+            ${stakeholders.map(s => `<span class="stake-chip">${s}</span>`).join('')}
+          </div>
+          <div class="mock-note">כל בעל עניין מקבל תצוגה מותאמת · לחיצה מנווטת לדשבורד הפרטני שלו</div>
+        </div>
+        
+        <div class="dashboard-card">
+          <h3>💼 הקצאת משאבים</h3>
+          <table class="data-table">
+            <tr><td>תקציב מוקצה</td><td>~₪45M</td></tr>
+            <tr><td>פרויקטים פעילים</td><td>7</td></tr>
+            <tr><td>אחריות ראשית</td><td>משרד מוביל</td></tr>
+            <tr><td>ROI מוערך</td><td>3.4x</td></tr>
+            <tr><td>אופק תכנון</td><td>5 שנים</td></tr>
+          </table>
+        </div>
+        
+        <div class="dashboard-card wide">
+          <h3>🔗 פעולות מומלצות</h3>
+          <table class="data-table">
+            <tr><td>אינטגרציית דאטה נוספת</td><td>עדיפות גבוהה</td></tr>
+            <tr><td>עדכון תקני בנייה</td><td>בתהליך</td></tr>
+            <tr><td>הרחבת כיסוי ניטור</td><td>דורש תקציב</td></tr>
+            <tr><td>פרוטוקול תיאום בין-משרדי</td><td>טיוטה</td></tr>
+          </table>
+          <div class="mock-note">פעולות מומלצות נגזרות מניתוח אלגוריתמי של שרשרת הערך</div>
+        </div>
+      </div>
+      
+      <div style="text-align:center; font-size:10px; color:#888; font-style:italic; margin-top:8px">
+        * זוהי דוגמה להמחשה של מוצר הקצה של מערכת ניהול שרשראות הערך
+      </div>
+    `;
+    
+    dashboardWrap.innerHTML = html;
+  }
+  
+  window.openDashboard = function() {
+    if (navStack.length === 0) return;
+    const currentId = navStack[navStack.length - 1];
+    
+    // Zoom out of sub-chain
+    subWrap.classList.add('zooming-out');
+    banner.classList.remove('show');
+    
+    setTimeout(() => {
+      subWrap.style.display = 'none';
+      subWrap.classList.remove('zooming-out');
+      
+      // Render and show dashboard
+      renderDashboard(currentId);
+      const meta = nodeMeta[currentId];
+      dashboardCrumbs.innerHTML = `
+        <span class="crumb-link" onclick="closeDashboardToMain()">אדפטציה לאומית</span> ← 
+        <span class="crumb-link" onclick="closeDashboard()">${meta.name}</span> ← 
+        <span class="current">📊 דשבורד</span>
+      `;
+      
+      dashboardWrap.style.display = 'block';
+      dashboardBanner.classList.add('show');
+      dashboardWrap.classList.add('zooming-in-start');
+      
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          dashboardWrap.classList.remove('zooming-in-start');
+          dashboardWrap.classList.add('zooming-in-active');
+        });
+      });
+      
+      setTimeout(() => {
+        dashboardWrap.classList.remove('zooming-in-active');
+      }, 700);
+    }, 500);
+  };
+  
+  window.closeDashboard = function() {
+    // Zoom out of dashboard, back to sub-chain
+    dashboardWrap.classList.add('zooming-out');
+    dashboardBanner.classList.remove('show');
+    
+    setTimeout(() => {
+      dashboardWrap.style.display = 'none';
+      dashboardWrap.classList.remove('zooming-out');
+      
+      subWrap.style.display = 'block';
+      banner.classList.add('show');
+      subWrap.classList.add('zooming-in-start');
+      
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          subWrap.classList.remove('zooming-in-start');
+          subWrap.classList.add('zooming-in-active');
+        });
+      });
+      
+      setTimeout(() => {
+        subWrap.classList.remove('zooming-in-active');
+      }, 700);
+    }, 500);
+  };
+  
+  window.closeDashboardToMain = function() {
+    // Close dashboard and go all the way back to main
+    dashboardWrap.classList.add('zooming-out');
+    dashboardBanner.classList.remove('show');
+    
+    setTimeout(() => {
+      dashboardWrap.style.display = 'none';
+      dashboardWrap.classList.remove('zooming-out');
+      
+      mainWrap.style.display = 'block';
+      mainWrap.classList.add('zooming-in-start');
+      
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          mainWrap.classList.remove('zooming-in-start');
+          mainWrap.classList.add('zooming-in-active');
+        });
+      });
+      
+      setTimeout(() => {
+        mainWrap.classList.remove('zooming-in-active');
+        mainWrap.style.transformOrigin = '';
+      }, 700);
+      
+      navStack = [];
+    }, 500);
+  };
+
+  function getSubchainLabels(parentId) {
+    const meta = nodeMeta[parentId];
+    const templates = {
+      event: [
+        ["מיפוי סיכון","מחקר מדעי","מעורבות קהילה","הערכה דינמית","לקחי עבר","עוצמה צפויה","תדירות","מוכנות"],
+        ["תכנית פעולה","תקציב ייעודי","כוח אדם","ציוד","פריסה","עדיפויות","ניתוח עלות","טכנולוגיה"],
+        ["חיישני שטח","תצפיות","דיווחי תושבים","לוויינים","תחנות מטאו'","התראות","בקרת איכות","מוקד שליטה"],
+        ["תקני בנייה","חובות דיווח","היתרים","תקנות חירום","אכיפה","ביטוח חובה","תקנות מקומיות","תיאום"],
+        ["משרד מוביל","רגולטור ראשי","רשויות מקומיות","מבקר המדינה","ועדת הכנסת","שירותי הצלה","חב' ביטוח","אקדמיה","תושבים","תקשורת","ארגונים בינ\"ל","ספקי טכנ'"],
+        ["מודלי חיזוי","ניתוח מגמות","למידת מכונה","דשבורדים","תרחישים","הערכת נזק","תמיכה בהחלטות","KPI"]
+      ],
+      damage: [
+        ["זיהוי נזק","הערכה","תיעוד","פגיעות","חינוך","מעקב מגמות","קרן הפחתה","תרחישי ייחוס"],
+        ["תקציב שיקום","רזרבה","תכנית חוסן","ביטוח","תיעוד","מענה","השקעה מונעת","הקצאה"],
+        ["מדידת היקף","דיווחי שטח","סקר נזקים","מעקב שיקום","חיישנים","מד נזק","תדירות","כיסוי ביטוח"],
+        ["חוקי פיצוי","תקנות שיקום","אחריות","תקני בטיחות","היתרים","מסגרת פיצוי","אחריות ממשל","אכיפה"],
+        ["משרד אחראי","ביטוח לאומי","ועדות פיצוי","מבקר המדינה","שלטון מקומי","ועדת חקירה","חב' ביטוח","רו\"ח וכלכ'","חוקרים","קורבנות ישירים","עסקים נפגעים","ארגוני סיוע"],
+        ["עלות-תועלת","מודלי הערכה","תחזית","תרחישים","השוואה בינ\"ל","מאגר נתונים","מדדי חוסן","דשבורד"]
+      ],
+      regulation: [
+        ["זיהוי פערים","סטנדרטים","חקיקה קיימת","לקחים","מיפוי רגולציה","התייעצות","דאטה רגולטורי","יעדים"],
+        ["תכנית חקיקה","תיאום גופים","תקציב אכיפה","תיעדוף","לוחות זמנים","הערכת השפעה","ניתוח עלות","פיילוט"],
+        ["בקרת יישום","דיווחי ציות","תיעוד הפרות","מעקב רגולטור","סקרים","אינדיקטורים","שקיפות","דוחות תקופתיים"],
+        ["חקיקה ראשית","תקנות משנה","נהלי אכיפה","ועדות ערר","בתי דין","מבקר","יועצים משפטיים","התאמה לאיחוד"],
+        ["מחוקקים","רגולטור","אוצר","מבקר המדינה","יועמ\"ש","ועדות כנסת","בתי משפט","ציבור","אקדמיה משפ'","התאחדויות","רשויות מקומיות","גופים בינ\"ל"],
+        ["ניתוח השפעה","מעקב תקנות","מודלי ציות","סטטיסטיקה","השוואה בינ\"ל","דשבורד רגולטורי","מטריקות","ROI"]
+      ],
+      stakeholder: [
+        ["מנדט","חזון","מפת שותפים","חפיפה","מפתחות","תהליכי החלטה","דיווח","אתגרים"],
+        ["תכנית","תקציב","משאבים","כוח אדם","שותפויות","יעדים","עדיפויות","ראייה מערכתית"],
+        ["מדדי ביצוע","בקרה","שקיפות","דיווחי שטח","KPI","איכות","שביעות רצון","מדידת השפעה"],
+        ["נהלים","אחריות משפטית","ציות","אתיקה","פרוטוקולים","שקיפות","ממשל","תקנות פנים"],
+        ["ממשלה","רגולטור","מבקר","תקשורת","איגודים","שותפים אסטרטג'","ספקים","לקוחות","עובדים","דירקטוריון","ציבור","אקדמיה"],
+        ["דשבורד ניהולי","אנליטיקה","מודלי חיזוי","דוחות הנהלה","KPI אסטרטגי","בנצ'מרק","תמיכה בהחלטות","ROI"]
+      ],
+      data: [
+        ["צרכים אנליטיים","זיהוי שאלות","איסוף דרישות","מיפוי דאטה","הערכה איכותית","עדיפויות","קריטיות","סטנדרטים"],
+        ["ארכיטקטורת דאטה","מודל דאטה","תקציב","כוח אדם","טכנולוגיה","אינטגרציות","רוד-מאפ","BI tools"],
+        ["איכות דאטה","זמינות","אינטגרציות","מהימנות","עדכניות","כיסוי","דיוק","שלמות"],
+        ["ממשל דאטה","פרטיות","אבטחת מידע","תקנות","שיתוף דאטה","בעלות","רישוי","עמידה ב-GDPR"],
+        ["CDO","אנליסטים","דאטה סיינטיסטים","מנהלי BI","אקדמיה","ספקי דאטה","מקבלי החלטות","משרדי ממשלה","חוקרים","חב' סטארט-אפ","Big Tech","IPCC"],
+        ["דשבורדים","ML models","AI חיזוי","ויזואליזציה","דוחות אוטו","התראות","השוואה בינ\"ל","insights"]
+      ]
+    };
+    return templates[meta.cat];
+  }
+
+  function generateSubchainSVG(parentId) {
+    const parentMeta = nodeMeta[parentId];
+    const labels = getSubchainLabels(parentId);
+    
+    const subZones = [
+      { center: 160, title: "מודעות", fillLight: "#5CB88A", fillDark: "#3D9970", stroke: "#2D7A5A", label: "#2D7A5A" },
+      { center: 238, title: "תכנון", fillLight: "#7ACC9D", fillDark: "#5CB88A", stroke: "#3D9970", label: "#2D7A5A" },
+      { center: 316, title: "ניטור", fillLight: "#E8B923", fillDark: "#D4A017", stroke: "#B8860B", label: "#8B6914" },
+      { center: 394, title: "רגולציה", fillLight: "#F0B070", fillDark: "#D89050", stroke: "#B8722E", label: "#7A4518" },
+      { center: 472, title: "בעלי עניין", fillLight: "#F09565", fillDark: "#E87D4E", stroke: "#D4663B", label: "#8B3A1F" },
+      { center: 550, title: "ניתוח דאטה", fillLight: "#E86B52", fillDark: "#D4533B", stroke: "#B8442E", label: "#8B2A1F" }
+    ];
+    
+    const seedOffset = parentId.charCodeAt(0) + parentId.charCodeAt(2) * 7;
+    function ps(i, offset) {
+      return Math.abs(Math.sin((i + offset + seedOffset) * 12.9898 + 1.1) * 43758.5453) % 1;
     }
+    
+    let nodesHTML = "", linesHTML = "";
+    const allNs = [];
+    
+    subZones.forEach((zone, zIdx) => {
+      const items = labels[zIdx];
+      const numItems = items.length;
+      const yStart = 130, yEnd = 445;
+      const yStep = (yEnd - yStart) / (numItems - 1);
+      
+      items.forEach((label, i) => {
+        const y = yStart + yStep * i;
+        const xOffset = (ps(zIdx*100 + i, 3) - 0.5) * 8;
+        const cx = zone.center + xOffset;
+        const r = 3.5 + ps(zIdx*200 + i, 7) * 1.5;
+        const fill = (i % 2 === 0) ? zone.fillDark : zone.fillLight;
+        const labelY = y - r - 3;
+        
+        nodesHTML += `<text x="${cx.toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" fill="${zone.label}" font-family="Arial" font-size="6.5" pointer-events="none">${label}</text>`;
+        nodesHTML += `<circle class="sub-dot" cx="${cx.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="${fill}" stroke="${zone.stroke}" stroke-width="0.8" style="filter:saturate(1.15) drop-shadow(0 0 2.5px rgba(255,255,255,0.7));"/>`;
+        
+        allNs.push({ cx, cy: y, zIdx });
+      });
+    });
+    
+    const subColors = ["#5B8A72", "#7A9E7E", "#B8860B", "#C08550", "#C75B39"];
+    allNs.forEach((node, idx) => {
+      if (node.zIdx < 5) {
+        const nextNodes = allNs.filter(n => n.zIdx === node.zIdx + 1);
+        const numConn = 1 + Math.floor(ps(idx, 11) * 2);
+        for (let j = 0; j < numConn && j < nextNodes.length; j++) {
+          const tIdx = Math.floor(ps(idx*10 + j, 17) * nextNodes.length);
+          const t = nextNodes[tIdx];
+          if (t) {
+            const color = subColors[node.zIdx];
+            const opacity = 0.12 + ps(idx + j*3, 13) * 0.2;
+            const width = 0.4 + ps(idx + j*5, 19) * 0.4;
+            linesHTML += `<line x1="${node.cx.toFixed(1)}" y1="${node.cy.toFixed(1)}" x2="${t.cx.toFixed(1)}" y2="${t.cy.toFixed(1)}" stroke="${color}" stroke-width="${width.toFixed(2)}" opacity="${opacity.toFixed(2)}"/>`;
+          }
+        }
+      }
+    });
+    
+    const col6Ns = allNs.filter(n => n.zIdx === 5);
+    col6Ns.forEach((node, i) => {
+      const opacity = 0.5 + ps(i*7, 31) * 0.3;
+      const width = 1.2 + ps(i*11, 37) * 0.6;
+      linesHTML += `<line x1="${node.cx.toFixed(1)}" y1="${node.cy.toFixed(1)}" x2="595" y2="290" stroke="#D4A017" stroke-width="${width.toFixed(2)}" opacity="${opacity.toFixed(2)}"/>`;
+    });
+    
+    const pName = parentMeta.name.length > 14 ? parentMeta.name.substring(0, 13) + '…' : parentMeta.name;
+    const dmgLabel = parentMeta.cat === 'event' ? 'נזק ממוקד' : 
+                     parentMeta.cat === 'damage' ? 'היקף נזק' : 'השפעה';
+    
+    return `<svg class="network-svg" viewBox="0 0 800 540" xmlns="http://www.w3.org/2000/svg">
+      <rect x="0" y="0" width="800" height="540" fill="#E8E8E8"/>
+      <path d="M0 140 Q200 120 400 140 T800 140" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+      <path d="M0 220 Q200 200 400 220 T800 220" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+      <path d="M0 300 Q200 320 400 300 T800 300" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+      <path d="M0 380 Q200 360 400 380 T800 380" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+      <path d="M0 460 Q200 440 400 460 T800 460" fill="none" stroke="#D8D8D8" stroke-width="1" opacity="0.6"/>
+      
+      <g transform="translate(60, 0)">
+        ${linesHTML}
+        <line x1="160" y1="120" x2="160" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+        <line x1="238" y1="120" x2="238" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+        <line x1="316" y1="120" x2="316" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+        <line x1="394" y1="120" x2="394" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+        <line x1="472" y1="120" x2="472" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+        <line x1="550" y1="120" x2="550" y2="460" stroke="#5D5D3D" stroke-width="1" stroke-dasharray="4 4" opacity="0.2"/>
+        
+        ${nodesHTML}
+        <text x="160" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">מודעות</text>
+        <text x="238" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">תכנון</text>
+        <text x="316" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">ניטור</text>
+        <text x="394" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">רגולציה</text>
+        <text x="472" y="482" text-anchor="middle" fill="#8B2A1F" font-family="Arial" font-size="10" font-weight="700">בעלי עניין</text>
+        <text x="550" y="482" text-anchor="middle" fill="#4A4A2A" font-family="Arial" font-size="10" font-weight="600">ניתוח דאטה</text>
+        
+        <rect x="10" y="250" width="90" height="80" rx="4" fill="#FFFFFF" stroke="#D4A017" stroke-width="3"/>
+        <rect x="10" y="250" width="6" height="80" rx="2" fill="#D4A017"/>
+        <text x="55" y="283" text-anchor="middle" fill="#8B6914" font-family="Arial" font-size="11" font-weight="700">${pName}</text>
+        <text x="55" y="305" text-anchor="middle" fill="#B8860B" font-family="Arial" font-size="8" font-style="italic">תת-שרשרת</text>
+        
+        <rect x="595" y="220" width="160" height="140" rx="4" fill="#FFFFFF" stroke="#B8442E" stroke-width="2.5"/>
+        <rect x="749" y="220" width="6" height="140" rx="2" fill="#B8442E"/>
+        <text x="671" y="250" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="13" font-weight="700">${dmgLabel}</text>
+        <text x="671" y="270" text-anchor="middle" fill="#888" font-family="Arial" font-size="9">(${parentMeta.name})</text>
+        <text x="671" y="305" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="18" font-weight="700">מאות</text>
+        <text x="671" y="328" text-anchor="middle" fill="#B8442E" font-family="Arial" font-size="14" font-weight="600">מיליוני ₪</text>
+        <text x="671" y="352" text-anchor="middle" fill="#888" font-family="Arial" font-size="8" font-style="italic">(הערכה גסה בלבד)</text>
+      </g>
+      
+      <text x="400" y="510" text-anchor="middle" fill="#888" font-family="Arial" font-size="9" font-style="italic">* תת-שרשרת של "${parentMeta.name}" - אותה סטרוקטורה עם בעלי תפקידים ייעודיים</text>
+    </svg>`;
+  }
 
-    // Monitoring
-    html += `
-      <div class="dash-section">
-        <h3>📈 ניטור - 12 חודשים אחרונים</h3>
-        ${mockBars(12)}
-        <div class="mock-note">נתונים לדוגמה | שילוב מקורות: ניטור סביבתי, דיווחי רשויות, חיישני IoT</div>
-      </div>`;
-
-    // Budget/resources
-    html += `
-      <div class="dash-section">
-        <h3>💰 הקצאת משאבים</h3>
-        <table class="placeholder-table">
-          <tr><td>תקציב שנתי מוקצה</td><td>~₪45M</td></tr>
-          <tr><td>גוף אחראי ראשי</td><td>${meta.cat === 'stakeholder' ? meta.name : 'משרד אחראי'}</td></tr>
-          <tr><td>פעולות מתוכננות</td><td>7 פרויקטים</td></tr>
-          <tr><td>KPI השנה</td><td>67% ✓</td></tr>
-        </table>
-        <div class="mock-note">נתונים לדוגמה להמחשה בלבד</div>
-      </div>`;
-
-    dashBody.innerHTML = html;
+  function renderSubchain() {
+    const currentId = navStack[navStack.length - 1];
+    subWrap.innerHTML = generateSubchainSVG(currentId);
+    const meta = nodeMeta[currentId];
+    crumbsEl.innerHTML = '<span class="crumb-link" onclick="closeSubchain()">אדפטציה לאומית</span> ← <span class="current">' + meta.name + '</span>';
+    subWrap.querySelectorAll('.sub-dot').forEach(sd => { sd.style.cursor = 'default'; });
   }
 
   window.nnReset = function() {
